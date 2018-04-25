@@ -17,3 +17,16 @@ Meta Learning for LSTM
 pip install -r requirements.txt
 ```
 
+## 3 待完成
+
+- 双向RNNs
+- 测试RNNs
+- metaLSTM
+- 测试metaLSTM
+
+
+
+
+
+
+

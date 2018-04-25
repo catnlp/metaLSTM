@@ -11,8 +11,7 @@ from torch.nn import Module
 from torch.autograd import Variable
 
 class RNNBase(Module):
-    def __init__(self, mode, input_size, hidden_size, recurrent_size=None, num_layers=1, bias=True,
-                 return_sequences=True, grad_clip=None):
+    def __init__(self, mode, input_size, hidden_size, num_layers, recurrent_size=None, bias=True, grad_clip=None):
         super(RNNBase, self).__init__()
         self.mode = mode
         self.input_size = input_size
@@ -20,7 +19,6 @@ class RNNBase(Module):
         self.recurrent_size = recurrent_size
         self.num_layers = num_layers
         self.bias = bias
-        self.return_sequences = return_sequences
         self.grad_clip = grad_clip
 
         mode2cell = {'RNN': RNNCells.RNNCell,
@@ -63,16 +61,12 @@ class RNNBase(Module):
                     x = hx
             outputs.append(hx)
 
-        if self.return_sequences:
-            if self.mode.startswith('LSTM'):
-                hs, cs = zip(*outputs)
-                h = torch.stack(hs).transpose(0, 1)
-                c = torch.stack(cs).transpose(0, 1)
-                output = (h, c)
-            else:
-                output = torch.stack(outputs).transpose(0, 1)
+        if self.mode.startswith('LSTM'):
+            hs, cs = zip(*outputs)
+            h = torch.stack(hs).transpose(0, 1)
+            output = h, (torch.unsqueeze(outputs[-1][0], 0), torch.unsqueeze(outputs[-1][1], 0))
         else:
-            output = outputs[-1]
+            output = torch.stack(outputs).transpose(0, 1), torch.unsqueeze(outputs[-1], 0)
         return output
 
 class RNN(RNNBase):

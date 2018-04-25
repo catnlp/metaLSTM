@@ -54,14 +54,14 @@ class RNNCell(RNNCellBase):
         return output
 
 '''
-i = sigmoid(W_{ii} * x + W_{hi} * h + b_i)
-f = sigmoid(W_{if} * x + W_{hf} * h + b_f)
-g = tanh(W_{ig} * x + W_{hg} * h + b_g)
-o = sigmoid(W_{io} * x + W_{ho} * h + b_o)
+i = sigmoid(W_{ii}x + W_{hi}h + b_i)
+f = sigmoid(W_{if}x + W_{hf}h + b_f)
+g = tanh(W_{ig}x + W_{hg}h + b_g)
+o = sigmoid(W_{io}x + W_{ho}h + b_o)
 c' = f * c + i * g
 h' = o * tanh(c')
 '''
-class LSTMCell():
+class LSTMCell(RNNCellBase):
     def __init__(self, input_size, hidden_size, bias=True, grad_clip=None):
         super(LSTMCell, self).__init__()
         self.input_size = input_size
@@ -81,6 +81,7 @@ class LSTMCell():
         stdv = 1.0 / math.sqrt(self.hidden_size)
         for weight in self.parameters():
             weight.data.uniform_(-stdv, stdv)
+
     def forward(self, input, hx):
         h, c = hx
 
@@ -90,7 +91,7 @@ class LSTMCell():
 
         i = F.sigmoid(pre[:, : self.hidden_size])
         f = F.sigmoid(pre[:, self.hidden_size: self.hidden_size * 2])
-        g = F.tanh(pre[:, self.hidden_size * 2, self.hidden_size * 3])
+        g = F.tanh(pre[:, self.hidden_size * 2: self.hidden_size * 3])
         o = F.sigmoid(pre[:, self.hidden_size * 3: ])
         c = f * c + i * g
         h = o * F.tanh(c)

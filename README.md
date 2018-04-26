@@ -1,3 +1,7 @@
+<p align="center"><img width="40%" src="images/catnlp_logo.png" /></p>
+
+--------------------------------------------------------------------------------
+
 # metaLSTM
 
 Meta Learning for LSTM
@@ -19,11 +23,11 @@ pip install -r requirements.txt
 
 ## 3 待完成
 
-- ~~metaLSTM~~
+- ~~metaRNNs~~
 - ~~简单测试RNNs和MetaRNNs~~
-- 双向RNNs
+- 双向RNNs和双向MetaRNNs
 - 测试RNNs
-- 测试metaLSTM
+- 测试metaRNNs
 
 
 

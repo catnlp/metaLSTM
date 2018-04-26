@@ -1,4 +1,4 @@
-<p align="center"><img width="40%" src="images/catnlp_logo.png" /></p>
+<p align="center"><src="images/catnlp_logo.png" /></p>
 
 --------------------------------------------------------------------------------
 

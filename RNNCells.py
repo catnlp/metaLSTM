@@ -22,7 +22,7 @@ class RNNCellBase(Module):
         return s.format(name=self.__class__.__name__, **self.__dict__)
 
 '''
-@Math: h' = tanh(w_{ih} * x  + w_{hh} * h + b)
+@Math: h' = tanh(w_{ih}x  + w_{hh}h + b)
 '''
 class RNNCell(RNNCellBase):
     def __init__(self, input_size, hidden_size, bias=True, grad_clip=None):

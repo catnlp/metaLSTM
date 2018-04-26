@@ -19,9 +19,10 @@ pip install -r requirements.txt
 
 ## 3 待完成
 
+- ~~metaLSTM~~
+- ~~简单测试RNNs和MetaRNNs~~
 - 双向RNNs
 - 测试RNNs
-- metaLSTM
 - 测试metaLSTM
 
 

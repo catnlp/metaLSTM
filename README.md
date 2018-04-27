@@ -21,7 +21,23 @@ Meta Learning for LSTM
 pip install -r requirements.txt
 ```
 
-## 3 待完成
+## 3 实验
+
+### 3.1 RNN和标准RNN
+
+ | 水果 | 价格 | 数量 |
+ | :--------: | :-----: | :----: |
+ | 香蕉 | $1 | 5 |
+ | 苹果 | $1 | 6 |
+ | 草莓 | $1 | 7 |
+
+
+作者：Gaolex
+链接：https://www.jianshu.com/p/abaff828100d
+來源：简书
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+## 4 待完成
 
 - ~~metaRNNs~~
 - ~~简单测试RNNs和MetaRNNs~~

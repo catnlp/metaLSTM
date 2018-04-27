@@ -2,7 +2,7 @@
 '''
 @Author: catnlp
 @Email: wk_nlp@163.com
-@Time: 2018/4/26 11:48
+@Time: 2018/4/27 19:07
 '''
 from RNNs import RNN
 
@@ -158,5 +158,5 @@ def train(model, model_name, save_path):
             torch.save(model.state_dict(), save_path)
     print('Best Accuracy of the model on the 10000 test images: %.2f %%' % best_accuracy)
 
-# train(model, 'RNN', '../models/RNN.pkl')
-train(base_model, 'base_RNN', '../models/base_RNN.pkl')
+train(model, 'RNN', '../models/RNN.pkl')
+# train(base_model, 'base_RNN', '../models/base_RNN.pkl')

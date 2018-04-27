@@ -64,9 +64,9 @@ class RNNBase(Module):
         if self.mode.startswith('LSTM'):
             hs, cs = zip(*outputs)
             h = torch.stack(hs).transpose(0, 1)
-            output = h, (torch.unsqueeze(outputs[-1][0], 0), torch.unsqueeze(outputs[-1][1], 0))
+            output = h, (outputs[-1][0], outputs[-1][1])
         else:
-            output = torch.stack(outputs).transpose(0, 1), torch.unsqueeze(outputs[-1], 0)
+            output = torch.stack(outputs).transpose(0, 1), outputs[-1]
         return output
 
 class RNN(RNNBase):

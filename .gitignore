@@ -103,3 +103,7 @@ ENV/
 *.iml
 gen/
 out/
+
+# project
+data/
+models/

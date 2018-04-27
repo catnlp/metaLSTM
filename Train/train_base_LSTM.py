@@ -2,10 +2,8 @@
 '''
 @Author: catnlp
 @Email: wk_nlp@163.com
-@Time: 2018/4/26 11:48
+@Time: 2018/4/27 22:01
 '''
-from RNNs import RNN
-
 import torch
 import torch.nn as nn
 import torchvision.datasets as dsets
@@ -13,6 +11,7 @@ import torchvision.transforms as transforms
 from torch.autograd import Variable
 import numpy as np
 import visdom
+import math
 
 torch.manual_seed(100)
 
@@ -35,28 +34,46 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=bat
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
 # RNN Model (Many-to-One)
-class RNNModel(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers, num_classes, bias=True, grad_clip=None):
-        super(RNNModel, self).__init__()
+class base_LSTMModel(nn.Module):
+    def __init__(self, input_size, hidden_size, num_layers, num_classes, bias=True):
+        super(base_LSTMModel, self).__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.num_classes = num_classes
-        self.rnn = RNN(input_size, hidden_size, num_layers=num_layers,
-                       bias=bias, grad_clip=grad_clip)
+        self.rnn = nn.LSTM(input_size, hidden_size, num_layers=num_layers, bias=bias, batch_first=True)
         self.fc = nn.Linear(hidden_size, num_classes, bias=bias)
+
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        stdv = 1.0 / math.sqrt(self.hidden_size)
+        for weight in self.parameters():
+            weight.data.uniform_(-stdv, stdv)
 
     def forward(self, x):
         # set initial states
-        initial_states = [Variable(torch.zeros(x.size(0), self.hidden_size)) for _ in range(self.num_layers)]
+        # initial_states = [Variable(torch.zeros(x.size(0), self.hidden_size)) for _ in range(self.num_layers)]
 
         # forward propagate RNN
-        _, out = self.rnn(x, initial_states)
+        out, _ = self.rnn(x)
+        # print('out0-------')
+        # print(out.size())
+        out = out[:, -1, :]
+        # print('out1------')
+        # print(out.size())
+        out.view(-1, self.hidden_size)
+        # print('out2----------')
+        # print(out.size())
         out = self.fc(out)
+        # print('out3--------')
+        # print(out.size())
         out = out.view(-1, self.num_classes)
+        # print('out4----------')
+        # print(out.size())
         return out
 
-model = RNNModel(input_size, hidden_size, num_layers, num_classes, bias=True, grad_clip=10)
+base_model = base_LSTMModel(input_size, hidden_size, num_layers, num_classes, bias=True)
 
 criterion = nn.CrossEntropyLoss()
 
@@ -112,4 +129,4 @@ def train(model, model_name, save_path):
             torch.save(model.state_dict(), save_path)
     print('Best Accuracy of the model on the 10000 test images: %.2f %%' % best_accuracy)
 
-train(model, 'RNN', '../models/RNN.pkl')
+train(base_model, 'base_LSTM', '../models/base_LSTM.pkl')

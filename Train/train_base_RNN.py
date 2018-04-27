@@ -4,8 +4,6 @@
 @Email: wk_nlp@163.com
 @Time: 2018/4/27 19:07
 '''
-from RNNs import RNN
-
 import torch
 import torch.nn as nn
 import torchvision.datasets as dsets
@@ -34,33 +32,6 @@ test_dataset = dsets.MNIST(root='../data/', train=False, transform=transforms.To
 # Data Loader (Input Pipeline)
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
-
-# RNN Model (Many-to-One)
-class RNNModel(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers, num_classes, bias=True, grad_clip=None):
-        super(RNNModel, self).__init__()
-        self.input_size = input_size
-        self.hidden_size = hidden_size
-        self.num_layers = num_layers
-        self.num_classes = num_classes
-        self.rnn = RNN(input_size, hidden_size, num_layers=num_layers,
-                       bias=bias, grad_clip=grad_clip)
-        self.fc = nn.Linear(hidden_size, num_classes, bias=bias)
-
-    def forward(self, x):
-        # set initial states
-        initial_states = [Variable(torch.zeros(x.size(0), self.hidden_size)) for _ in range(self.num_layers)]
-
-        # forward propagate RNN
-        _, out = self.rnn(x, initial_states)
-        out = self.fc(out)
-        # print(out.size())
-        out = out.view(-1, self.num_classes)
-        # print('out----------')
-        # print(out.size())
-        return out
-
-model = RNNModel(input_size, hidden_size, num_layers, num_classes, bias=True, grad_clip=10)
 
 # RNN Model (Many-to-One)
 class base_RNNModel(nn.Module):
@@ -158,5 +129,4 @@ def train(model, model_name, save_path):
             torch.save(model.state_dict(), save_path)
     print('Best Accuracy of the model on the 10000 test images: %.2f %%' % best_accuracy)
 
-train(model, 'RNN', '../models/RNN.pkl')
-# train(base_model, 'base_RNN', '../models/base_RNN.pkl')
+train(base_model, 'base_RNN', '../models/base_RNN.pkl')

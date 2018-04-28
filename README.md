@@ -26,6 +26,7 @@ pip install -r requirements.txt
 ### 3.1 测试集MNIST
 
 [MNIST官网](http://yann.lecun.com/exdb/mnist/)
+
 MNIST是一个手写数字数据集，训练集有60，000个例子，测试集有10，000个例子。
 
 #### 3.1.1 标准RNN和RNN
@@ -36,16 +37,18 @@ MNIST是一个手写数字数据集，训练集有60，000个例子，测试集�
 
 #### 3.1.2 标准LSTM和LSTM
 
+- [x] 实验结果
+
 <p align="center"><img width="100%" src="images/base_LSTM_MNIST.PNG" /></p>
 
 ## 4 待完成
 
-- ~~metaRNNs~~
-- ~~简单测试RNNs和MetaRNNs~~
-- ~~在MNIST上测试RNNs~~
-- 在MNIST上测试MetaRNNs
-- 在NER上测试RNNs
-- 在NER上测试MetaRNNs
-- 双向RNNs和双向MetaRNNs
-- Normalization(Batch, Layer, Dropout)
-- Attention
+- [x] metaRNNs
+- [x] 简单测试RNNs和MetaRNNs
+- [x] 在MNIST上测试RNNs
+- [ ] 在MNIST上测试MetaRNNs
+- [ ] 在NER上测试RNNs
+- [ ] 在NER上测试MetaRNNs
+- [ ] 双向RNNs和双向MetaRNNs
+- [ ] Normalization(Batch, Layer, Dropout)
+- [ ] Attention

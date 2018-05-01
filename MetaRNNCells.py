@@ -4,7 +4,6 @@
 @Email: wk_nlp@163.com
 @Time: 2018/4/25 21:19
 '''
-import RNNCells
 from utils import clip_grad
 import math
 
@@ -40,11 +39,15 @@ class MetaRNNCell(MetaRNNCellBase):
         self.weight_hh = Parameter(torch.Tensor(hyper_hidden_size, hyper_hidden_size))
         self.weight_Hh = Parameter(torch.Tensor(hyper_hidden_size, hidden_size))
 
-        self.weight_hz = Parameter(torch.Tensor(hyper_embedding_size, hyper_hidden_size))
+        self.weight_hzi = Parameter(torch.Tensor(hyper_embedding_size, hyper_hidden_size))
+        self.weight_hzH = Parameter(torch.Tensor(hyper_embedding_size, hyper_hidden_size))
+        self.weight_hzb = Parameter(torch.Tensor(hyper_embedding_size, hyper_hidden_size))
         self.weight_dziH = Parameter(torch.Tensor(hidden_size, hyper_embedding_size))
         self.weight_dzHH = Parameter(torch.Tensor(hidden_size, hyper_embedding_size))
         self.weight_bzH = Parameter(torch.Tensor(hidden_size, hyper_embedding_size))
         if bias:
+            self.bias_i = Parameter(torch.Tensor(hyper_embedding_size))
+            self.bias_H = Parameter(torch.Tensor(hyper_embedding_size))
             self.bias = Parameter(torch.Tensor(hidden_size))
         else:
             self.register_parameter('bias', None)
@@ -69,9 +72,11 @@ class MetaRNNCell(MetaRNNCellBase):
             meta_output = clip_grad(meta_output, -self.grad_clip, self.grad_clip)
         meta_output = F.relu(meta_output)
 
-        z = F.linear(meta_output, self.weight_hz)
+        zi = F.linear(meta_output, self.weight_hzi) + self.bias_i
+        zH = F.linear(meta_output, self.weight_hzH) + self.bias_H
+        zb = F.linear(meta_output, self.weight_hzb)
 
-        output = F.linear(z, self.weight_dziH) * F.linear(input, self.weight_iH) + F.linear(z, self.weight_dzHH) * F.linear(H, self.weight_HH) + F.linear(z, self.weight_bzH)
+        output = F.linear(zi, self.weight_dziH) * F.linear(input, self.weight_iH) + F.linear(zH, self.weight_dzHH) * F.linear(H, self.weight_HH) + F.linear(zb, self.weight_bzH) + self.bias
         if self.grad_clip:
             output = clip_grad(output, -self.grad_clip, self.grad_clip)
         output = F.relu(output)
@@ -92,11 +97,15 @@ class MetaLSTMCell(MetaRNNCellBase):
         self.weight_ih = Parameter(torch.Tensor(4 * hyper_hidden_size, input_size + hidden_size))
         self.weight_hh = Parameter(torch.Tensor(4 * hyper_hidden_size, hyper_hidden_size))
 
-        self.weight_hz = Parameter(torch.Tensor(hyper_embedding_size, hyper_hidden_size))
+        self.weight_hzi = Parameter(torch.Tensor(hyper_embedding_size, hyper_hidden_size))
+        self.weight_hzH = Parameter(torch.Tensor(hyper_embedding_size, hyper_hidden_size))
+        self.weight_hzb = Parameter(torch.Tensor(hyper_embedding_size, hyper_hidden_size))
         self.weight_dziH = Parameter(torch.Tensor(4 * hidden_size, hyper_embedding_size))
         self.weight_dzHH = Parameter(torch.Tensor(4 * hidden_size, hyper_embedding_size))
         self.weight_bzH = Parameter(torch.Tensor(4 * hidden_size, hyper_embedding_size))
         if bias:
+            self.bias_i = Parameter(torch.Tensor(hyper_embedding_size))
+            self.bias_H = Parameter(torch.Tensor(hyper_embedding_size))
             self.bias = Parameter(torch.Tensor(4 * hidden_size))
         else:
             self.register_parameter('bias', None)
@@ -131,9 +140,11 @@ class MetaLSTMCell(MetaRNNCellBase):
         meta_c = meta_f * meta_c + meta_i * meta_g
         meta_h = meta_o * F.tanh(meta_c)
 
-        z = F.linear(meta_h, self.weight_hz)
+        zi = F.linear(meta_h, self.weight_hzi) + self.bias_i
+        zH = F.linear(meta_h, self.weight_hzH) + self.bias_H
+        zb = F.linear(meta_h, self.weight_hzb)
 
-        pre = F.linear(z, self.weight_dziH) * F.linear(input, self.weight_iH) + F.linear(z, self.weight_dzHH) * F.linear(main_h, self.weight_HH) + F.linear(z, self.weight_bzH)
+        pre = F.linear(zi, self.weight_dziH) * F.linear(input, self.weight_iH) + F.linear(zH, self.weight_dzHH) * F.linear(main_h, self.weight_HH) + F.linear(zb, self.weight_bzH) + self.bias
         if self.grad_clip:
             pre = clip_grad(pre, -self.grad_clip, self.grad_clip)
 

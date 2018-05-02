@@ -41,12 +41,18 @@ MNIST是一个手写数字数据集，训练集有60，000个例子，测试集�
 
 <p align="center"><img width="100%" src="images/base_LSTM_MNIST.PNG" /></p>
 
+#### 3.1.3 MetaRNN和MetaLSTM
+
+- [x] 实验结果
+
+<p align="center"><img width="100%" src="images/meta_RNN_LSTM_MNIST.PNG" /></p>
+
 ## 4 待完成
 
 - [x] metaRNNs
 - [x] 简单测试RNNs和MetaRNNs
 - [x] 在MNIST上测试RNNs
-- [ ] 在MNIST上测试MetaRNNs
+- [x] 在MNIST上测试MetaRNNs
 - [ ] 在NER上测试RNNs
 - [ ] 在NER上测试MetaRNNs
 - [ ] 双向RNNs和双向MetaRNNs

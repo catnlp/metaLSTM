@@ -14,6 +14,7 @@ Meta Learning for LSTM
 - [x] [(4) supercell](https://github.com/hardmaru/supercell)
 - [x] [(5) Meta Multi-Task Learning for Sequence Modeling](https://arxiv.org/pdf/1802.08969.pdf)
 - [x] [(6) Optimization As a Model For Few-Shot Learning ](https://openreview.net/pdf?id=rJY0-Kcll)
+- [x] [(7) NCRF++](https://github.com/jiesutd/NCRFpp)
 
 ## 2 环境
 
@@ -46,6 +47,24 @@ MNIST是一个手写数字数据集，训练集有60，000个例子，测试集�
 - [x] 实验结果
 
 <p align="center"><img width="100%" src="images/meta_RNN_LSTM_MNIST.PNG" /></p>
+
+### 3.2 测试集CoNLL-2003
+
+[CoNLL-2003官网](https://www.clips.uantwerpen.be/conll2003/ner/)
+
+CoNLL-2003是一个命名实体识别数据集，包含4类实体：PER, LOC, ORG, MISC
+
+#### 3.2.1 标准RNN和RNN
+
+- [ ] 实验结果
+
+#### 3.2.2 标准LSTM和LSTM
+
+- [ ] 实验结果
+
+#### 3.2.3 MetaRNN和MetaLSTM
+
+- [ ] 实验结果
 
 ## 4 待完成
 

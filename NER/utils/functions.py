@@ -26,7 +26,7 @@ def read_instance(input_file, word_alphabet, label_alphabet, number_normalized, 
     for line in in_lines:
         if len(line) > 2:
             pairs = line.strip().split()
-            word = pairs[0].decode('utf-8')
+            word = pairs[0] # catnlp
             if number_normalized:
                 word = normalize_word(word)
             label = pairs[-1]
@@ -46,7 +46,7 @@ def read_instance(input_file, word_alphabet, label_alphabet, number_normalized, 
     return instance_texts, instance_ids
 
 def build_pretrain_embedding(embedding_path, word_alphabet, embed_dim=100, norm=True):
-    embed_dim = dict()
+    embed_dict = dict()
     if embedding_path != None:
         embed_dict, embed_dim = load_pretrain_emb(embedding_path)
     alphabet_size = word_alphabet.size()
@@ -64,9 +64,9 @@ def build_pretrain_embedding(embedding_path, word_alphabet, embed_dim=100, norm=
             perfect_match += 1
         elif word.lower() in embed_dict:
             if norm:
-                pretrain_emb[index, :] = norm2one(embed_dict[word])
+                pretrain_emb[index, :] = norm2one(embed_dict[word.lower()])
             else:
-                pretrain_emb[index, :] = embed_dict[word]
+                pretrain_emb[index, :] = embed_dict[word.lower()]
             case_match += 1
         else:
             pretrain_emb[index, :] = np.random.uniform(-scale, scale, [1, embed_dim])
@@ -95,5 +95,5 @@ def load_pretrain_emb(embedding_path):
                 assert(embed_dim + 1 == len(tokens))
             embed = np.empty([1, embed_dim])
             embed[:] = tokens[1: ]
-            embed_dict[tokens[0].decode('utf-8')] = embed
+            embed_dict[tokens[0]] = embed # catnlp
     return embed_dict, embed_dim

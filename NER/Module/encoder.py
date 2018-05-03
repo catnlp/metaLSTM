@@ -18,7 +18,6 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
         print('---build batched Encoder---')
         self.gpu = config.gpu
-        self.use_char = config.use_char
         self.batch_size = config.batch_size
 
         self.embedding_dim = config.word_emb_dim
@@ -27,11 +26,11 @@ class Encoder(nn.Module):
         self.hyper_embedding_dim = config.hyper_embedding_dim
         self.layers = config.layers
         self.drop = nn.Dropout(config.dropout)
-        self.word_embeddings = nn.Embedding(config.word_dict.size(), self.embedding_dim)
-        if config.pretain_word_embedding is not None:
-            self.word_embeddings.weight.data.copy_(torch.from_numpy(config.pretain_word_embedding))
+        self.word_embeddings = nn.Embedding(config.word_alphabet.size(), self.embedding_dim)
+        if config.pretrain_word_embedding is not None:
+            self.word_embeddings.weight.data.copy_(torch.from_numpy(config.pretrain_word_embedding))
         else:
-            self.word_embeddings.weight.data.copy_(torch.from_numpy(self.random_embedding(config.word_dict.size(), self.embedding_dim)))
+            self.word_embeddings.weight.data.copy_(torch.from_numpy(self.random_embedding(config.word_alphabet.size(), self.embedding_dim)))
 
         mode = config.word_features
         if mode == 'BaseRNN':
@@ -50,7 +49,7 @@ class Encoder(nn.Module):
             print('Error word feature selection, please check config.word_features.')
             exit(0)
 
-        self.hidden2tag = nn.Linear(self.hidden_dim, config.label_dict_size)
+        self.hidden2tag = nn.Linear(self.hidden_dim, config.label_alphabet_size)
 
     def random_embedding(self, vocab_size, embedding_dim):
         initial_emb = np.empty([vocab_size, embedding_dim])

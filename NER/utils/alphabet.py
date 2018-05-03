@@ -59,7 +59,7 @@ class Alphabet:
         return len(self.instances) + 1
 
     def iteritems(self):
-        return self.instance2index.iteritems()
+        return self.instance2index.items() # catnlp
 
     def enumerate_items(self, start=1):
         if start < 1 or start >= self.size():

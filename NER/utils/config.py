@@ -130,8 +130,8 @@ class Config:
         in_lines = open(input_file, 'r').readlines()
         for line in in_lines:
             if len(line) > 2:
-                pairs = line.strip.split()
-                word = pairs[0].decode('utf-8')
+                pairs = line.strip().split()
+                word = pairs[0] # catnlp
                 if self.number_normalized:
                     word = normalize_word(word)
                 label = pairs[-1]

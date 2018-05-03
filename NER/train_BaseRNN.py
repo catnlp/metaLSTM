@@ -18,7 +18,6 @@ import gc
 import pickle
 import torch.autograd as autograd
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
 import visdom
@@ -76,7 +75,7 @@ def save_data_setting(data, save_file):
     new_data.test_ids = []
     new_data.raw_ids = []
 
-    with open(save_file, 'w') as fp:
+    with open(save_file, 'wb+') as fp:
         pickle.dump(new_data, fp)
     print('Data setting saved to file: ', save_file)
 
@@ -138,7 +137,7 @@ def batchify_with_label(input_batch_list, gpu, volatile_flag=False):
     batch_size = len(input_batch_list)
     words = [sent[0] for sent in input_batch_list]
     labels = [sent[-1] for sent in input_batch_list]
-    word_seq_lengths = torch.LongTensor(map(len, words))
+    word_seq_lengths = torch.LongTensor(list(map(len, words)))
     max_seq_len = word_seq_lengths.max()
     word_seq_tensor = autograd.Variable(torch.zeros((batch_size, max_seq_len)), volatile=volatile_flag).long()
     label_seq_tensor = autograd.Variable(torch.zeros((batch_size, max_seq_len)), volatile=volatile_flag).long()
@@ -215,9 +214,10 @@ def train(data, name, save_dset, save_model_dir, seg=True):
                 print('\tInstance: %s; Time: %.2fs; loss: %.4f; acc: %s/%s=%.4f'
                       % ( end, tmp_cost, sample_loss, right_token, whole_token, (right_token+0.0) / whole_token))
                 sys.stdout.flush()
-                losses.append(sample_loss / 50.0)
+                losses.append(sample_loss / 500.0)
+                Lwin = 'Loss of ' + name
                 vis.line(np.array(losses), X=np.array([i for i in range(len(losses))]),
-                         win=name, opts={'title': name, 'legend': ['loss']})
+                         win=Lwin, opts={'title': Lwin, 'legend': ['loss']})
                 sample_loss = 0
             loss.backward()
             if data.clip:
@@ -231,7 +231,7 @@ def train(data, name, save_dset, save_model_dir, seg=True):
         epoch_finish = time.time()
         epoch_cost = epoch_finish - epoch_start
         print('Epoch: %s training finished. Time: %.2fs, speed: %.2ft/s, total_loss: %s'
-              % idx, epoch_cost, train_num/epoch_cost, total_loss)
+              % (idx, epoch_cost, train_num/epoch_cost, total_loss))
         speed, acc, p, r, f_train, _ = evaluate(data, model, 'train')
         speed, acc, p, r, f_dev, _ = evaluate(data, model, 'dev')
         speed, acc, p, r, f_test, _ = evaluate(data, model, 'test')
@@ -240,7 +240,7 @@ def train(data, name, save_dset, save_model_dir, seg=True):
 
         if seg:
             current_score = f_test
-            print('Test: time: %.2fs, speed: %.2ft/s; acc: %.4f, p: %.4f, r: $.4f, f: %.4f'
+            print('Test: time: %.2fs, speed: %.2ft/s; acc: %.4f, p: %.4f, r: %.4f, f: %.4f'
                   % (test_cost, speed, acc, p, r, f_test))
         else:
             current_score = acc
@@ -254,9 +254,10 @@ def train(data, name, save_dset, save_model_dir, seg=True):
             model_name = save_model_dir + '/' + name + '_model_' + str(idx)
             torch.save(model.state_dict(), model_name)
             best_test = current_score
-            with open(save_model_dir + '/' + name + '_eval_' + str(idx) + '.txt', 'wb') as f:
+            with open(save_model_dir + '/' + name + '_eval_' + str(idx) + '.txt', 'w') as f:
                 if seg:
                     f.write('acc: %.4f, p: %.4f, r: %.4f, f: %.4f' % (acc, p, r, best_test))
+                    f.write('acc: %.4f, p: %.4f' % (acc, p))
                 else:
                     f.write('acc: %.4f' % acc)
 
@@ -297,7 +298,7 @@ if __name__ == '__main__':
     parser.add_argument('--train', default='../data/conll2003/train.bmes')
     parser.add_argument('--dev', default='../data/conll2003/dev.bmes')
     parser.add_argument('--test', default='../data/conll2003/test.bmes')
-    parser.add_argument('--gpu', default='True')
+    parser.add_argument('--gpu', default='False')
     parser.add_argument('--seg', default='True')
     parser.add_argument('--extendalphabet', default='True')
     parser.add_argument('--raw')

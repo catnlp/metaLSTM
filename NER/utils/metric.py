@@ -86,7 +86,7 @@ def get_ner_BMES(label_list):
             index_tag = ''
         else:
             continue
-    if (whole_tag != '') and (index_tag != ''):
+    if (whole_tag != '') & (index_tag != ''):
         tag_list.append(whole_tag)
     tag_list_len = len(tag_list)
 

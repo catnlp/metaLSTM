@@ -65,6 +65,7 @@ class Encoder(nn.Module):
         packed_words = pack_padded_sequence(word_embs, word_seq_lengths.cpu().numpy(), True)
         out, _ = self.encoder(packed_words)
         out, _ = pad_packed_sequence(out)
+        out = out.transpose(1, 0)
 
         return out
 

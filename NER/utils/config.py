@@ -48,7 +48,7 @@ class Config:
         self.hyper_hidden_dim = 50
         self.hyper_embedding_dim = 50
         self.dropout = 0.5
-        self.layers = 1
+        self.layers = 2
         self.gpu = False
         self.lr = 0.015
         self.lr_decay = 0.05

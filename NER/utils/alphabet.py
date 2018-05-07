@@ -52,7 +52,7 @@ class Alphabet:
         try:
             return self.instances[index - 1]
         except IndexError:
-            print('WARNING: Alphabet get_instance, unknown instance, return the first label')
+            print('WARNING: Alphabet get_instance, unknown instance, return the first label.')
             return self.instances[0]
 
     def size(self):

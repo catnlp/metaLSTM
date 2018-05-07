@@ -32,18 +32,18 @@ class Encoder(nn.Module):
         else:
             self.word_embeddings.weight.data.copy_(torch.from_numpy(self.random_embedding(config.word_alphabet.size(), self.embedding_dim)))
 
-        mode = config.word_features
-        if mode == 'BaseRNN':
+        self.mode = config.word_features
+        if self.mode == 'BaseRNN':
             self.encoder = nn.RNN(self.embedding_dim, self.hidden_dim, num_layers=self.layers, batch_first=True)
-        elif mode == 'RNN':
+        elif self.mode == 'RNN':
             self.encoder = RNN(self.embedding_dim, self.hidden_dim, num_layers=self.layers)
-        elif mode == 'MetaRNN':
+        elif self.mode == 'MetaRNN':
             self.encoder = MetaRNN(self.embedding_dim, self.hidden_dim, self.hyper_hidden_dim, self.hyper_embedding_dim, num_layers=self.layers)
-        elif mode == 'BaseLSTM':
+        elif self.mode == 'BaseLSTM':
             self.encoder = nn.LSTM(self.embedding_dim, self.hidden_dim, num_layers=self.layers, batch_first=True)
-        elif mode == 'LSTM':
+        elif self.mode == 'LSTM':
             self.encoder = LSTM(self.embedding_dim, self.hidden_dim, num_layers=self.layers)
-        elif mode == 'MetaLSTM':
+        elif self.mode == 'MetaLSTM':
             self.encoder = MetaLSTM(self.embedding_dim, self.hidden_dim, self.hyper_hidden_dim, self.hyper_embedding_dim, num_layers=self.layers)
         else:
             print('Error word feature selection, please check config.word_features.')
@@ -62,10 +62,13 @@ class Encoder(nn.Module):
         word_embs = self.word_embeddings(word_inputs)
         word_embs = self.drop(word_embs)
 
-        packed_words = pack_padded_sequence(word_embs, word_seq_lengths.cpu().numpy(), True)
-        out, _ = self.encoder(packed_words)
-        out, _ = pad_packed_sequence(out)
-        out = out.transpose(1, 0)
+        if self.mode.startswith('Base'):
+            packed_words = pack_padded_sequence(word_embs, word_seq_lengths.cpu().numpy(), True)
+            out, _ = self.encoder(packed_words)
+            out, _ = pad_packed_sequence(out)
+            out = out.transpose(1, 0)
+        else:
+            out, _ = self.encoder(word_embs)
 
         return out
 

@@ -373,18 +373,3 @@ if __name__ == '__main__':
         data.write_decoded_results(output_file, decode_results, 'raw')
     else:
         print('Invalid argument! Please use valid arguments! (train/test/decode)')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

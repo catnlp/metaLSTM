@@ -4,12 +4,6 @@
 @Email: wk_nlp@163.com
 @Time: 2018/5/2 14:14
 '''
-# encoding:utf-8
-'''
-@Author: catnlp
-@Email: wk_nlp@163.com
-@Time: 2018/5/2 14:08
-'''
 from NER.utils.metric import get_ner_fmeasure
 from NER.Module.ner import NER
 from NER.utils.config import Config

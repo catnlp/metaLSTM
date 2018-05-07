@@ -100,9 +100,3 @@ class Encoder(nn.Module):
         tag_seq = tag_seq.view(batch_size, seq_len)
         decode_seq = mask.long() * tag_seq
         return decode_seq
-
-
-
-
-
-

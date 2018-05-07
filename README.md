@@ -60,7 +60,9 @@ CoNLL-2003是一个命名实体识别数据集，包含4类实体：PER, LOC, OR
 
 #### 3.2.2 标准LSTM和LSTM
 
-- [ ] 实验结果
+- [x] 实验结果
+
+<p align="center"><img width="100%" src="images/base_LSTM_CoNLL-2003.PNG" /></p>
 
 #### 3.2.3 MetaRNN和MetaLSTM
 
@@ -72,8 +74,8 @@ CoNLL-2003是一个命名实体识别数据集，包含4类实体：PER, LOC, OR
 - [x] 简单测试RNNs和MetaRNNs
 - [x] 在MNIST上测试RNNs
 - [x] 在MNIST上测试MetaRNNs
-- [ ] 在NER上测试RNNs
-- [ ] 在NER上测试MetaRNNs
+- [x] 在CoNLL-2003上测试RNNs
+- [ ] 在CoNLL-2003上测试MetaRNNs
 - [ ] 双向RNNs和双向MetaRNNs
 - [ ] Normalization(Batch, Layer, Dropout)
 - [ ] Attention

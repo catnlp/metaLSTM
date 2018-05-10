@@ -347,6 +347,7 @@ if __name__ == '__main__':
             emb_file = None
         name = 'MetaRNN'  # catnlp
         config = Config()
+        config.lr = 0.0015
         config.number_normalized = True
         data_initialization(config, train_file, dev_file, test_file)
         config.gpu = gpu

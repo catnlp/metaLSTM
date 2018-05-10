@@ -15,6 +15,8 @@ Meta Learning for LSTM
 - [x] [(5) Meta Multi-Task Learning for Sequence Modeling](https://arxiv.org/pdf/1802.08969.pdf)
 - [x] [(6) Optimization As a Model For Few-Shot Learning ](https://openreview.net/pdf?id=rJY0-Kcll)
 - [x] [(7) NCRF++](https://github.com/jiesutd/NCRFpp)
+- [x] [(8) Recurrent Batch Normalization](https://arxiv.org/pdf/1603.09025.pdf)
+- [x] [(9) batch_normalized_LSTM](https://github.com/sysuNie/batch_normalized_LSTM)
 
 ## 2 环境
 
@@ -56,7 +58,11 @@ CoNLL-2003是一个命名实体识别数据集，包含4类实体：PER, LOC, OR
 
 #### 3.2.1 标准RNN和RNN
 
-- [ ] 实验结果
+- [x] 实验结果
+
+<p align="center"><img width="100%" src="images/base_RNN_CoNLL-2003.PNG" /></p>
+
+*注：RNN图很快停止是因为训练时出现了NAN*
 
 #### 3.2.2 标准LSTM和LSTM
 
@@ -66,7 +72,11 @@ CoNLL-2003是一个命名实体识别数据集，包含4类实体：PER, LOC, OR
 
 #### 3.2.3 MetaRNN和MetaLSTM
 
-- [ ] 实验结果
+- [x] 实验结果
+
+<p align="center"><img width="100%" src="images/meta_RNN_LSTM_CoNLL-2003.PNG" /></p>
+
+*注：MetaRNN图很快停止是因为训练时出现了NAN*
 
 ## 4 待完成
 
@@ -75,7 +85,14 @@ CoNLL-2003是一个命名实体识别数据集，包含4类实体：PER, LOC, OR
 - [x] 在MNIST上测试RNNs
 - [x] 在MNIST上测试MetaRNNs
 - [x] 在CoNLL-2003上测试RNNs
-- [ ] 在CoNLL-2003上测试MetaRNNs
-- [ ] 双向RNNs和双向MetaRNNs
+- [x] 在CoNLL-2003上测试MetaRNNs
 - [ ] Normalization(Batch, Layer, Dropout)
+- [ ] 双向RNNs和双向MetaRNNs
 - [ ] Attention
+- [ ] Multi-task
+
+## 5 体会
+
+- [x] sgd训练，学习率lr设置很重要，过大容易训练不了
+- [x] LSTM比RNN及其变种更容易训练，即使学习率lr设置过大
+- [x] RNN在训练过程中，Loss容易变成NAN，而无法进一步训练

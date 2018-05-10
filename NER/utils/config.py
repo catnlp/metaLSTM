@@ -45,10 +45,10 @@ class Config:
         self.iteration = 100
         self.batch_size = 10
         self.hidden_dim = 100
-        self.hyper_hidden_dim = 50
-        self.hyper_embedding_dim = 50
+        self.hyper_hidden_dim = 100
+        self.hyper_embedding_dim = 16
         self.dropout = 0.5
-        self.layers = 2
+        self.layers = 1
         self.gpu = False
         self.lr = 0.015
         self.lr_decay = 0.05

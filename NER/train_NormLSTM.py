@@ -2,7 +2,7 @@
 '''
 @Author: catnlp
 @Email: wk_nlp@163.com
-@Time: 2018/5/2 14:08
+@Time: 2018/5/8 19:50
 '''
 from NER.utils.metric import get_ner_fmeasure
 from NER.Module.ner import NER
@@ -193,6 +193,8 @@ def train(data, name, save_dset, save_model_dir, seg=True):
         for batch_id in range(total_batch):
             start = batch_id * batch_size
             end = (batch_id+1) * batch_size
+            if start + 1 == train_num:
+                break
             if end > train_num:
                 end = train_num
             instance = data.train_ids[start: end]
@@ -207,7 +209,7 @@ def train(data, name, save_dset, save_model_dir, seg=True):
             sample_loss += loss.data[0]
             total_loss += loss.data[0]
 
-            if end % 500 == 0:
+            if end % (batch_size * 50) == 0:
                 tmp_time = time.time()
                 tmp_cost = tmp_time - tmp_start
                 tmp_start = tmp_time
@@ -293,8 +295,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Tuning with NER')
     parser.add_argument('--wordemb', help='Embedding for words', default='glove')
     parser.add_argument('--status', choices=['train', 'test', 'decode'], help='update algorithm', default='train')
-    parser.add_argument('--savemodel', default='../models/conll2003/BaseRNN') # catnlp
-    parser.add_argument('--savedset', help='Dir of saved data setting', default='../models/conll2003/BaseRNN.dset') # catnlp
+    parser.add_argument('--savemodel', default='../models/conll2003/NormLSTM') # catnlp
+    parser.add_argument('--savedset', help='Dir of saved data setting', default='../models/conll2003/NormLSTM.dset') # catnlp
     parser.add_argument('--train', default='../data/conll2003/train.bmes')
     parser.add_argument('--dev', default='../data/conll2003/dev.bmes')
     parser.add_argument('--test', default='../data/conll2003/test.bmes')
@@ -345,10 +347,10 @@ if __name__ == '__main__':
             emb_file = '../data/embedding/glove.6B.100d.txt'
         else:
             emb_file = None
-        name = 'BaseRNN'  # catnlp
+        name = 'NormLSTM'  # catnlp
         config = Config()
-        config.lr = 0.0015
         config.number_normalized = True
+        config.batch_size = 10
         data_initialization(config, train_file, dev_file, test_file)
         config.gpu = gpu
         config.word_features = name
@@ -374,18 +376,3 @@ if __name__ == '__main__':
         data.write_decoded_results(output_file, decode_results, 'raw')
     else:
         print('Invalid argument! Please use valid arguments! (train/test/decode)')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

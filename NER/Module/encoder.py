@@ -6,6 +6,8 @@
 '''
 from RNNs import RNN, LSTM
 from MetaRNNs import MetaRNN, MetaLSTM
+from NormLSTM import NormLSTM, LSTMCell, BNLSTMCell
+from MetaNormLSTM import MetaNormLSTM, MetaLSTMCell, BNMetaLSTMCell
 
 import torch
 import torch.nn as nn
@@ -45,6 +47,10 @@ class Encoder(nn.Module):
             self.encoder = LSTM(self.embedding_dim, self.hidden_dim, num_layers=self.layers)
         elif self.mode == 'MetaLSTM':
             self.encoder = MetaLSTM(self.embedding_dim, self.hidden_dim, self.hyper_hidden_dim, self.hyper_embedding_dim, num_layers=self.layers)
+        elif self.mode == 'NormLSTM':
+            self.encoder = NormLSTM(BNLSTMCell, self.embedding_dim, self.hidden_dim, num_layers=self.layers, batch_first=True, max_length=config.MAX_SENTENCE_LENGTH)
+        elif self.mode == 'MetaNormLSTM':
+            self.encoder = MetaNormLSTM(MetaLSTMCell, self.embedding_dim, self.hidden_dim, num_layers=self.layers, batch_first=True, max_length=config.MAX_SENTENCE_LENGTH)
         else:
             print('Error word feature selection, please check config.word_features.')
             exit(0)

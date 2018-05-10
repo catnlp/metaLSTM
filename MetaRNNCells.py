@@ -72,9 +72,9 @@ class MetaRNNCell(MetaRNNCellBase):
             meta_output = clip_grad(meta_output, -self.grad_clip, self.grad_clip)
         meta_output = F.relu(meta_output)
 
-        zi = F.linear(meta_output, self.weight_hzi) + self.bias_i
-        zH = F.linear(meta_output, self.weight_hzH) + self.bias_H
-        zb = F.linear(meta_output, self.weight_hzb)
+        zi = F.linear(h, self.weight_hzi) + self.bias_i
+        zH = F.linear(h, self.weight_hzH) + self.bias_H
+        zb = F.linear(h, self.weight_hzb)
 
         output = F.linear(zi, self.weight_dziH) * F.linear(input, self.weight_iH) + F.linear(zH, self.weight_dzHH) * F.linear(H, self.weight_HH) + F.linear(zb, self.weight_bzH) + self.bias
         if self.grad_clip:
@@ -90,6 +90,7 @@ class MetaLSTMCell(MetaRNNCellBase):
         self.hyper_hidden_size = hyper_hidden_size
         self.hyper_embedding_size = hyper_embedding_size
         self.grad_clip = grad_clip
+        self.dropout = torch.nn.Dropout(0.5)
 
         self.weight_iH = Parameter(torch.Tensor(4 * hidden_size, input_size))
         self.weight_HH = Parameter(torch.Tensor(4 * hidden_size, hidden_size))
@@ -129,6 +130,10 @@ class MetaLSTMCell(MetaRNNCellBase):
         meta_h = meta_state[0]
         meta_c = meta_state[1]
 
+        zi = F.linear(meta_h, self.weight_hzi) + self.bias_i
+        zH = F.linear(meta_h, self.weight_hzH) + self.bias_H
+        zb = F.linear(meta_h, self.weight_hzb)
+
         meta_pre = F.linear(torch.cat((input, main_h), 1), self.weight_ih) + F.linear(meta_h, self.weight_hh) + self.bias_hyper
         if self.grad_clip:
             meta_pre = clip_grad(meta_pre, -self.grad_clip, self.grad_clip)
@@ -140,10 +145,6 @@ class MetaLSTMCell(MetaRNNCellBase):
         meta_c = meta_f * meta_c + meta_i * meta_g
         meta_h = meta_o * F.tanh(meta_c)
 
-        zi = F.linear(meta_h, self.weight_hzi) + self.bias_i
-        zH = F.linear(meta_h, self.weight_hzH) + self.bias_H
-        zb = F.linear(meta_h, self.weight_hzb)
-
         pre = F.linear(zi, self.weight_dziH) * F.linear(input, self.weight_iH) + F.linear(zH, self.weight_dzHH) * F.linear(main_h, self.weight_HH) + F.linear(zb, self.weight_bzH) + self.bias
         if self.grad_clip:
             pre = clip_grad(pre, -self.grad_clip, self.grad_clip)
@@ -152,6 +153,6 @@ class MetaLSTMCell(MetaRNNCellBase):
         main_f = F.sigmoid(pre[:, self.hidden_size: self.hidden_size * 2])
         main_g = F.tanh(pre[:, self.hidden_size * 2: self.hidden_size * 3])
         main_o = F.sigmoid(pre[:, self.hidden_size * 3:])
-        main_c = main_f * main_c + main_i * main_g
+        main_c = main_f * main_c + main_i * self.dropout(main_g)
         main_h = main_o * F.tanh(main_c)
         return ((main_h, main_c), (meta_h, meta_c))

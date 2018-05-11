@@ -11,7 +11,7 @@ from torch.nn import Module
 from torch.autograd import Variable
 
 class MetaRNNBase(Module):
-    def __init__(self, mode, input_size, hidden_size, hyper_hidden_size, hyper_embedding_size, num_layers, recurrent_size=None, bias=True, bias_hyper=True, grad_clip=None):
+    def __init__(self, mode, input_size, hidden_size, hyper_hidden_size, hyper_embedding_size, num_layers, recurrent_size=None, bias=True, bias_hyper=True, grad_clip=None, gpu=False):
         super(MetaRNNBase, self).__init__()
         self.mode = mode
         self.input_size = input_size
@@ -23,6 +23,7 @@ class MetaRNNBase(Module):
         self.bias = bias
         self.bias_hyper = bias_hyper
         self.grad_clip = grad_clip
+        self.gpu = gpu
 
         mode2cell = {'MetaRNN': MetaRNNCells.MetaRNNCell,
                      'MetaLSTM': MetaRNNCells.MetaLSTMCell}
@@ -47,6 +48,9 @@ class MetaRNNBase(Module):
         if initial_states is None:
             main_zeros = Variable(torch.zeros(input.size(0), self.hidden_size))
             meta_zeros = Variable(torch.zeros(input.size(0), self.hyper_hidden_size))
+            if self.gpu:
+                main_zeros = main_zeros.cuda()
+                meta_zeros = meta_zeros.cuda()
             zeros = (main_zeros, meta_zeros)
             if self.mode == 'MetaLSTM':
                 initial_states = [((main_zeros, main_zeros), (meta_zeros, meta_zeros)), ] * self.num_layers

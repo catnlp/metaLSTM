@@ -8,6 +8,7 @@ from RNNs import RNN, LSTM
 from MetaRNNs import MetaRNN, MetaLSTM
 from NormLSTM import NormLSTM, LSTMCell, BNLSTMCell
 from MetaNormLSTM import MetaNormLSTM, MetaLSTMCell, BNMetaLSTMCell
+from NER.Module.char import Char
 
 import torch
 import torch.nn as nn
@@ -21,6 +22,13 @@ class Encoder(nn.Module):
         print('---build batched Encoder---')
         self.gpu = config.gpu
         self.batch_size = config.batch_size
+        self.char_hidden_dim = 0
+
+        self.use_char = config.use_char
+        if self.use_char:
+            self.char_hidden_dim = config.char_hidden_dim
+            self.char_embedding_dim = config.char_emb_dim
+            self.char = Char(config.char_features, config.char_alphabet.size(), self.char_embedding_dim, self.char_hidden_dim, config.dropout, self.gpu)
 
         self.embedding_dim = config.word_emb_dim
         self.hidden_dim = config.hidden_dim
@@ -36,24 +44,27 @@ class Encoder(nn.Module):
 
         self.mode = config.word_features
         if self.mode == 'BaseRNN':
-            self.encoder = nn.RNN(self.embedding_dim, self.hidden_dim, num_layers=self.layers, batch_first=True)
+            self.encoder = nn.RNN(self.char_hidden_dim+self.embedding_dim, self.hidden_dim, num_layers=self.layers, batch_first=True)
         elif self.mode == 'RNN':
-            self.encoder = RNN(self.embedding_dim, self.hidden_dim, num_layers=self.layers)
+            self.encoder = RNN(self.char_hidden_dim+self.embedding_dim, self.hidden_dim, num_layers=self.layers, gpu=self.gpu)
         elif self.mode == 'MetaRNN':
-            self.encoder = MetaRNN(self.embedding_dim, self.hidden_dim, self.hyper_hidden_dim, self.hyper_embedding_dim, num_layers=self.layers)
+            self.encoder = MetaRNN(self.char_hidden_dim+self.embedding_dim, self.hidden_dim, self.hyper_hidden_dim, self.hyper_embedding_dim, num_layers=self.layers, gpu=self.gpu)
         elif self.mode == 'BaseLSTM':
-            self.encoder = nn.LSTM(self.embedding_dim, self.hidden_dim, num_layers=self.layers, batch_first=True)
+            self.encoder = nn.LSTM(self.char_hidden_dim+self.embedding_dim, self.hidden_dim, num_layers=self.layers, batch_first=True)
         elif self.mode == 'LSTM':
-            self.encoder = LSTM(self.embedding_dim, self.hidden_dim, num_layers=self.layers)
+            self.encoder = LSTM(self.char_hidden_dim+self.embedding_dim, self.hidden_dim, num_layers=self.layers, gpu=self.gpu)
         elif self.mode == 'MetaLSTM':
-            self.encoder = MetaLSTM(self.embedding_dim, self.hidden_dim, self.hyper_hidden_dim, self.hyper_embedding_dim, num_layers=self.layers)
+            self.encoder = MetaLSTM(self.char_hidden_dim+self.embedding_dim, self.hidden_dim, self.hyper_hidden_dim, self.hyper_embedding_dim, num_layers=self.layers, gpu=self.gpu)
         elif self.mode == 'NormLSTM':
-            self.encoder = NormLSTM(BNLSTMCell, self.embedding_dim, self.hidden_dim, num_layers=self.layers, batch_first=True, max_length=config.MAX_SENTENCE_LENGTH)
+            self.encoder = NormLSTM(BNLSTMCell, self.char_hidden_dim+self.embedding_dim, self.hidden_dim, num_layers=self.layers, batch_first=True, max_length=config.MAX_SENTENCE_LENGTH)
         elif self.mode == 'MetaNormLSTM':
-            self.encoder = MetaNormLSTM(MetaLSTMCell, self.embedding_dim, self.hidden_dim, num_layers=self.layers, batch_first=True, max_length=config.MAX_SENTENCE_LENGTH)
+            self.encoder = MetaNormLSTM(MetaLSTMCell, self.char_hidden_dim+self.embedding_dim, self.hidden_dim, num_layers=self.layers, batch_first=True, max_length=config.MAX_SENTENCE_LENGTH)
         else:
             print('Error word feature selection, please check config.word_features.')
             exit(0)
+
+        if config.gpu:
+            self.encoder = self.encoder.cuda()
 
         self.hidden2tag = nn.Linear(self.hidden_dim, config.label_alphabet_size)
 
@@ -64,10 +75,19 @@ class Encoder(nn.Module):
             initial_emb[i, :] = np.random.uniform(-scale, scale, [1, embedding_dim])
         return initial_emb
 
-    def get_word_features(self, word_inputs, word_seq_lengths):
+    def get_word_features(self, word_inputs, word_seq_lengths, char_inputs, char_seq_lengths, char_seq_recover):
+        batch_size = word_inputs.size(0)
+        sent_len = word_inputs.size(1)
         word_embs = self.word_embeddings(word_inputs)
-        word_embs = self.drop(word_embs)
 
+
+        if self.use_char:
+            char_features = self.char.get_last_hiddens(char_inputs, char_seq_lengths.cpu().numpy())
+            char_features = char_features[char_seq_recover]
+            char_features = char_features.view(batch_size, sent_len, -1)
+            word_embs = torch.cat([word_embs, char_features], 2)
+
+        word_embs = self.drop(word_embs)
         if self.mode.startswith('Base'):
             packed_words = pack_padded_sequence(word_embs, word_seq_lengths.cpu().numpy(), True)
             out, _ = self.encoder(packed_words)
@@ -78,17 +98,17 @@ class Encoder(nn.Module):
 
         return out
 
-    def get_output_score(self, word_inputs, word_seq_lengths):
-        out = self.get_word_features(word_inputs, word_seq_lengths)
+    def get_output_score(self, word_inputs, word_seq_lengths, char_inputs, char_seq_lengths, char_seq_recover):
+        out = self.get_word_features(word_inputs, word_seq_lengths, char_inputs, char_seq_lengths, char_seq_recover)
         out = self.hidden2tag(out)
         return out
 
-    def neg_log_likelihood_loss(self, word_inputs, word_seq_lengths, batch_label):
+    def neg_log_likelihood_loss(self, word_inputs, word_seq_lengths, char_inputs, char_seq_lengths, char_seq_recover, batch_label):
         batch_size = word_inputs.size(0)
         seq_len = word_inputs.size(1)
         total_words = batch_size * seq_len
         loss_function = nn.NLLLoss(ignore_index=0, size_average=False)
-        out = self.get_output_score(word_inputs, word_seq_lengths)
+        out = self.get_output_score(word_inputs, word_seq_lengths, char_inputs, char_seq_lengths, char_seq_recover)
         out = out.view(total_words, -1)
         score = F.log_softmax(out, 1)
         loss = loss_function(score, batch_label.view(total_words))
@@ -96,11 +116,11 @@ class Encoder(nn.Module):
         tag_seq = tag_seq.view(batch_size, seq_len)
         return loss, tag_seq
 
-    def forward(self, word_inputs, word_seq_lengths, mask):
+    def forward(self, word_inputs, word_seq_lengths, char_inputs, char_seq_lengths, char_seq_recover, mask):
         batch_size = word_inputs.size(0)
         seq_len = word_inputs.size(1)
         total_words = batch_size * seq_len
-        out = self.get_output_score(word_inputs, word_seq_lengths)
+        out = self.get_output_score(word_inputs, word_seq_lengths, char_seq_lengths, char_seq_recover)
         out = out.view(total_words, -1)
         _, tag_seq = torch.max(out, 1)
         tag_seq = tag_seq.view(batch_size, seq_len)

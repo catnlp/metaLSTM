@@ -11,7 +11,7 @@ from torch.nn import Module
 from torch.autograd import Variable
 
 class RNNBase(Module):
-    def __init__(self, mode, input_size, hidden_size, num_layers, recurrent_size=None, bias=True, grad_clip=None):
+    def __init__(self, mode, input_size, hidden_size, num_layers, recurrent_size=None, bias=True, grad_clip=None, gpu=False):
         super(RNNBase, self).__init__()
         self.mode = mode
         self.input_size = input_size
@@ -20,6 +20,7 @@ class RNNBase(Module):
         self.num_layers = num_layers
         self.bias = bias
         self.grad_clip = grad_clip
+        self.gpu = gpu
 
         mode2cell = {'RNN': RNNCells.RNNCell,
                      'LSTM': RNNCells.LSTMCell}
@@ -40,6 +41,8 @@ class RNNBase(Module):
     def forward(self, input, initial_states=None):
         if initial_states is None:
             zeros = Variable(torch.zeros(input.size(0), self.hidden_size))
+            if self.gpu:
+                zeros = zeros.cuda()
             if self.mode == 'LSTM':
                 initial_states = [(zeros, zeros), ] * self.num_layers
             else:

@@ -15,13 +15,15 @@ def normalize_word(word):
             new_word += char
     return new_word
 
-def read_instance(input_file, word_alphabet, label_alphabet, number_normalized, max_sent_length):
+def read_instance(input_file, word_alphabet, char_alphabet, label_alphabet, number_normalized, max_sent_length, char_padding_size=-1, char_padding_symbol='</pad>'):
     in_lines = open(input_file, 'r').readlines()
     instance_texts = []
     instance_ids = []
     words = []
+    chars = []
     labels = []
     word_ids = []
+    char_ids = []
     labels_ids = []
     for line in in_lines:
         if len(line) > 2:
@@ -34,14 +36,29 @@ def read_instance(input_file, word_alphabet, label_alphabet, number_normalized, 
             labels.append(label)
             word_ids.append(word_alphabet.get_index(word))
             labels_ids.append(label_alphabet.get_index(label))
+            char_list = []
+            char_id = []
+            for char in word:
+                char_list.append(char)
+            if char_padding_size > 0:
+                char_number = len(char_list)
+                if char_number < char_padding_size:
+                    char_list = char_list + [char_padding_symbol] * (char_padding_size - char_number)
+                assert (len(char_list) == char_padding_size)
+            for char in char_list:
+                char_id.append(char_alphabet.get_index(char))
+            chars.append(char_list)
+            char_ids.append(char_id)
         else:
             if (max_sent_length < 0) or (len(words) < max_sent_length):
-                instance_texts.append([words, labels])
-                instance_ids.append([word_ids, labels_ids])
+                instance_texts.append([words, chars, labels])
+                instance_ids.append([word_ids, char_ids, labels_ids])
 
             words = []
+            chars = []
             labels = []
             word_ids = []
+            char_ids = []
             labels_ids = []
     return instance_texts, instance_ids
 

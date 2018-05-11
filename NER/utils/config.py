@@ -20,10 +20,13 @@ class Config:
         self.MAX_WORD_LENGTH = -1
         self.number_normalized = True
         self.norm_word_emb = False
+        self.norm_char_emb = False
         self.word_alphabet = Alphabet('word')
+        self.char_alphabet = Alphabet('character')
         self.label_alphabet = Alphabet('label', True)
         self.tagScheme = 'NoSeg'
         self.word_features = 'BaseRNN' # 'RNN' / 'MetaRNN'
+        self.char_features = 'LSTM'
 
         self.train_texts = []
         self.dev_texts = []
@@ -36,9 +39,12 @@ class Config:
         self.raw_ids = []
 
         self.word_emb_dim = 100
+        self.char_emb_dim = 30
         self.pretrain_word_embedding = None
+        self.pretrain_char_embedding = None
         self.label_size = 0
         self.word_alphabet_size = 0
+        self.char_alphabet_size = 0
         self.label_alphabet_size = 0
 
         # hyper parameters
@@ -47,13 +53,15 @@ class Config:
         self.hidden_dim = 100
         self.hyper_hidden_dim = 100
         self.hyper_embedding_dim = 16
+        self.char_hidden_dim = 50
+        self.use_char = True
         self.dropout = 0.5
         self.layers = 1
         self.gpu = False
-        self.lr = 0.015
+        self.lr = 0.0015
         self.lr_decay = 0.05
         self.clip = None
-        self.momentum = 0.9
+        self.momentum = 0
 
     def show_data_summary(self):
         print("DATA SUMMARY START:")
@@ -62,9 +70,12 @@ class Config:
         print("\tMAX WORD LENGTH: %s" % (self.MAX_WORD_LENGTH))
         print("\tNumber normalized: %s" % (self.number_normalized))
         print("\tWord alphabet size: %s" % (self.word_alphabet_size))
+        print("\tChar alphabet size: %s" % (self.char_alphabet_size))
         print("\tLabel alphabet size: %s" % (self.label_alphabet_size))
         print("\tWord embedding size: %s" % (self.word_emb_dim))
+        print("\tChar embedding size: %s" % (self.char_emb_dim))
         print("\tNorm word emb: %s" % (self.norm_word_emb))
+        print("\tNorm char emb: %s" % (self.norm_char_emb))
         print("\tTrain instance number: %s" % (len(self.train_texts)))
         print("\tDev instance number: %s" % (len(self.dev_texts)))
         print("\tTest instance number: %s" % (len(self.test_texts)))
@@ -81,6 +92,9 @@ class Config:
         print("\tHyper dropout: %s" % (self.dropout))
         print("\tHyper layers: %s" % (self.layers))
         print("\tHyper GPU: %s" % (self.gpu))
+        print("\tHyper user_char: %s" % (self.use_char))
+        if self.use_char:
+            print("\tChar features: %s" % (self.char_features))
         print("DATA SUMMARY END.")
         sys.stdout.flush()
 
@@ -109,8 +123,9 @@ class Config:
         self.fix_alphabet()
         print('Refresh label alphabet finished: old:%s -> new:%s' % (old_size, self.label_alphabet_size))
 
-    def extend_word_alphabet(self, input_file_list):
+    def extend_word_char_alphabet(self, input_file_list):
         old_word_size = self.word_alphabet_size
+        old_char_size = self.char_alphabet_size
         for input_file in input_file_list:
             in_lines = open(input_file, 'r').readlines()
             for line in in_lines:
@@ -120,9 +135,13 @@ class Config:
                     if self.number_normalized:
                         word = normalize_word(word)
                     self.word_alphabet.add(word)
+                    for char in word:
+                        self.char_alphabet.add(char)
             self.word_alphabet_size = self.word_alphabet.size()
-            print('Extend word alphabet finished!')
+            self.char_alphabet_size = self.char_alphabet.size()
+            print('Extend word/char alphabet finished!')
             print('\told word:%s -> new word:%s' % (old_word_size, self.word_alphabet_size))
+            print('\told char:%s -> new char:%s' % (old_char_size, self.char_alphabet_size))
             for input_file in input_file_list:
                 print('\tfrom file:%s' % input_file)
 
@@ -137,7 +156,10 @@ class Config:
                 label = pairs[-1]
                 self.label_alphabet.add(label)
                 self.word_alphabet.add(word)
+                for char in word:
+                    self.char_alphabet.add(char)
         self.word_alphabet_size = self.word_alphabet.size()
+        self.char_alphabet_size = self.char_alphabet.size()
         self.label_alphabet_size = self.label_alphabet.size()
         startS = False
         startB = False
@@ -155,20 +177,24 @@ class Config:
     def fix_alphabet(self):
         self.word_alphabet.close()
         self.label_alphabet.close()
+        self.char_alphabet.close()
 
     def build_word_pretain_emb(self, emb_path):
         self.pretrain_word_embedding, self.word_emb_dim = build_pretrain_embedding(emb_path, self.word_alphabet, self.word_emb_dim, self.norm_word_emb)
 
+    def build_char_pretrain_emb(self, emb_path):
+        self.pretrain_char_embedding, self.char_emb_dim = build_pretrain_embedding(emb_path, self.char_alphabet, self.char_emb_dim, self.norm_char_emb)
+
     def generate_instance(self, input_file, name):
         self.fix_alphabet()
         if name == 'train':
-            self.train_texts, self.train_ids = read_instance(input_file, self.word_alphabet, self.label_alphabet, self.number_normalized, self.MAX_SENTENCE_LENGTH)
+            self.train_texts, self.train_ids = read_instance(input_file, self.word_alphabet, self.char_alphabet, self.label_alphabet, self.number_normalized, self.MAX_SENTENCE_LENGTH)
         elif name == 'dev':
-            self.dev_texts, self.dev_ids = read_instance(input_file, self.word_alphabet, self.label_alphabet, self.number_normalized, self.MAX_SENTENCE_LENGTH)
+            self.dev_texts, self.dev_ids = read_instance(input_file, self.word_alphabet, self.char_alphabet, self.label_alphabet, self.number_normalized, self.MAX_SENTENCE_LENGTH)
         elif name == 'test':
-            self.test_texts, self.test_ids = read_instance(input_file, self.word_alphabet, self.label_alphabet, self.number_normalized, self.MAX_SENTENCE_LENGTH)
+            self.test_texts, self.test_ids = read_instance(input_file, self.word_alphabet, self.char_alphabet, self.label_alphabet, self.number_normalized, self.MAX_SENTENCE_LENGTH)
         elif name == 'raw':
-            self.raw_texts, self.raw_ids = read_instance(input_file, self.word_alphabet, self.label_alphabet, self.number_normalized, self.MAX_SENTENCE_LENGTH)
+            self.raw_texts, self.raw_ids = read_instance(input_file, self.word_alphabet, self.char_alphabet, self.label_alphabet, self.number_normalized, self.MAX_SENTENCE_LENGTH)
         else:
             print('Error: you can only generate train/dev/test/raw instance! Illegal input:%s' % name)
 

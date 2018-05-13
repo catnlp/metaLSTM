@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
         name = 'LSTM'  # catnlp
         config = Config()
-        config.lr = 0.0015
+        config.lr = 0.015
         config.number_normalized = True
         data_initialization(config, train_file, dev_file, test_file)
         config.gpu = gpu

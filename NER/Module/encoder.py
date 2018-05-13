@@ -50,7 +50,7 @@ class Encoder(nn.Module):
         elif self.mode == 'MetaRNN':
             self.encoder = MetaRNN(self.char_hidden_dim+self.embedding_dim, self.hidden_dim, self.hyper_hidden_dim, self.hyper_embedding_dim, num_layers=self.layers, gpu=self.gpu)
         elif self.mode == 'BaseLSTM':
-            self.encoder = nn.LSTM(self.char_hidden_dim+self.embedding_dim, self.hidden_dim, num_layers=self.layers, batch_first=True)
+            self.encoder = nn.LSTM(self.char_hidden_dim+self.embedding_dim, self.hidden_dim//2, num_layers=self.layers, batch_first=True, bidirectional=True)
         elif self.mode == 'LSTM':
             self.encoder = LSTM(self.char_hidden_dim+self.embedding_dim, self.hidden_dim, num_layers=self.layers, gpu=self.gpu)
         elif self.mode == 'MetaLSTM':

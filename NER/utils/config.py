@@ -60,7 +60,7 @@ class Config:
         self.gpu = False
         self.lr = 0.0015
         self.lr_decay = 0.05
-        self.clip = None
+        self.clip = False
         self.momentum = 0
 
     def show_data_summary(self):

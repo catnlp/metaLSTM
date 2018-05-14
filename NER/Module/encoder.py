@@ -4,10 +4,10 @@
 @Email: wk_nlp@163.com
 @Time: 2018/5/2 15:01
 '''
-from RNNs import RNN, LSTM
-from MetaRNNs import MetaRNN, MetaLSTM
-from NormLSTM import NormLSTM, LSTMCell, BNLSTMCell
-from MetaNormLSTM import MetaNormLSTM, MetaLSTMCell, BNMetaLSTMCell
+from Module.RNNs import RNN, LSTM
+from Module.MetaRNNs import MetaRNN, MetaLSTM
+from Module.NormLSTM import NormLSTM, BNLSTMCell
+from Module.MetaNormLSTM import MetaNormLSTM, MetaLSTMCell
 from NER.Module.char import Char
 
 import torch

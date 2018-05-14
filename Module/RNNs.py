@@ -4,7 +4,7 @@
 @Email: wk_nlp@163.com
 @Time: 2018/4/24 19:36
 '''
-import RNNCells
+from Module import RNNCells
 
 import torch
 from torch.nn import Module

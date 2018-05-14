@@ -84,6 +84,8 @@ if __name__ == '__main__':
         name = 'LSTM'  # catnlp
         config = Config()
         config.lr = 0.015
+        config.hidden_dim = 200
+        config.bid_flag = True
         config.number_normalized = True
         data_initialization(config, train_file, dev_file, test_file)
         config.gpu = gpu

@@ -21,6 +21,7 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
         print('---build batched Encoder---')
         self.gpu = config.gpu
+        self.bidirectional = config.bid_flag
         self.batch_size = config.batch_size
         self.char_hidden_dim = 0
 
@@ -52,9 +53,9 @@ class Encoder(nn.Module):
         elif self.mode == 'BaseLSTM':
             self.encoder = nn.LSTM(self.char_hidden_dim+self.embedding_dim, self.hidden_dim//2, num_layers=self.layers, batch_first=True, bidirectional=True)
         elif self.mode == 'LSTM':
-            self.encoder = LSTM(self.char_hidden_dim+self.embedding_dim, self.hidden_dim, num_layers=self.layers, gpu=self.gpu)
+            self.encoder = LSTM(self.char_hidden_dim+self.embedding_dim, self.hidden_dim//2, num_layers=self.layers, gpu=self.gpu, bidirectional=self.bidirectional)
         elif self.mode == 'MetaLSTM':
-            self.encoder = MetaLSTM(self.char_hidden_dim+self.embedding_dim, self.hidden_dim, self.hyper_hidden_dim, self.hyper_embedding_dim, num_layers=self.layers, gpu=self.gpu)
+            self.encoder = MetaLSTM(self.char_hidden_dim+self.embedding_dim, self.hidden_dim//2, self.hyper_hidden_dim, self.hyper_embedding_dim, num_layers=self.layers, gpu=self.gpu, bidirectional=self.bidirectional)
         elif self.mode == 'NormLSTM':
             self.encoder = NormLSTM(BNLSTMCell, self.char_hidden_dim+self.embedding_dim, self.hidden_dim, num_layers=self.layers, batch_first=True, max_length=config.MAX_SENTENCE_LENGTH)
         elif self.mode == 'MetaNormLSTM':

@@ -57,6 +57,7 @@ class Config:
         self.use_char = True
         self.dropout = 0.5
         self.layers = 1
+        self.bid_flag = False
         self.gpu = False
         self.lr = 0.0015
         self.lr_decay = 0.05
@@ -87,6 +88,7 @@ class Config:
         print("\tHyper clip: %s" % (self.clip))
         print("\tHyper momentum: %s" % (self.momentum))
         print("\tHyper hidden_dim: %s" % (self.hidden_dim))
+        print("\tHyper bid_flag: %s" % (self.bid_flag))
         print("\tHyper hyper_hidden_dim: %s" % (self.hyper_hidden_dim))
         print("\tHyper hyper_embedding_dim: %s" % (self.hyper_embedding_dim))
         print("\tHyper dropout: %s" % (self.dropout))

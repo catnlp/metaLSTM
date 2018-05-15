@@ -39,18 +39,24 @@ class MetaRNNBase(Module):
                   'bias_hyper': bias_hyper,
                   'grad_clip': grad_clip}
 
-        self.cell0 = Cell(**kwargs)
-        for i in range(1, num_layers):
-            kwargs['input_size'] = hidden_size
-            cell = Cell(**kwargs)
-            setattr(self, 'cell{}'.format(i), cell)
-
         if self.bidirectional:
+            self.cell0 = Cell(**kwargs)
+            for i in range(1, num_layers):
+                kwargs['input_size'] = hidden_size * 2
+                cell = Cell(**kwargs)
+                setattr(self, 'cell{}'.format(i), cell)
+
             self.cellb0 = Cell(**kwargs)
+            for i in range(1, num_layers):
+                kwargs['input_size'] = hidden_size * 2
+                cell = Cell(**kwargs)
+                setattr(self, 'cellb{}'.format(i), cell)
+        else:
+            self.cell0 = Cell(**kwargs)
             for i in range(1, num_layers):
                 kwargs['input_size'] = hidden_size
                 cell = Cell(**kwargs)
-                setattr(self, 'cellb{}'.format(i), cell)
+                setattr(self, 'cell{}'.format(i), cell)
 
     def _initial_states(self, inputSize):
         main_zeros = Variable(torch.zeros(inputSize, self.hidden_size))
@@ -93,6 +99,7 @@ class MetaRNNBase(Module):
                         outputs_b.append(hx[0][0])
                     else:
                         outputs_b.append(hx[0])
+                outputs_b.reverse()
                 input = torch.cat([torch.stack(outputs_f).transpose(0, 1), torch.stack(outputs_b).transpose(0, 1)], 2)
                 outputs_f = []
                 outputs_b = []

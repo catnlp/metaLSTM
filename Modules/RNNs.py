@@ -33,18 +33,24 @@ class RNNBase(Module):
                   'bias': bias,
                   'grad_clip': grad_clip}
 
-        self.cell0 = Cell(**kwargs)
-        for i in range(1, num_layers):
-            kwargs['input_size'] = hidden_size
-            cell = Cell(**kwargs)
-            setattr(self, 'cell{}'.format(i), cell)
-
         if self.bidirectional:
+            self.cell0 = Cell(**kwargs)
+            for i in range(1, num_layers):
+                kwargs['input_size'] = hidden_size * 2
+                cell = Cell(**kwargs)
+                setattr(self, 'cell{}'.format(i), cell)
+
             self.cellb0 = Cell(**kwargs)
+            for i in range(1, num_layers):
+                kwargs['input_size'] = hidden_size * 2
+                cell = Cell(**kwargs)
+                setattr(self, 'cellb{}'.format(i), cell)
+        else:
+            self.cell0 = Cell(**kwargs)
             for i in range(1, num_layers):
                 kwargs['input_size'] = hidden_size
                 cell = Cell(**kwargs)
-                setattr(self, 'cellb{}'.format(i), cell)
+                setattr(self, 'cell{}'.format(i), cell)
 
     def _initial_states(self, inputSize):
         zeros = Variable(torch.zeros(inputSize, self.hidden_size))
@@ -58,7 +64,6 @@ class RNNBase(Module):
 
     def forward(self, input):
         states = self._initial_states(input.size(0))
-        outputs = []
         time_steps = input.size(1)
 
         if self.bidirectional:
@@ -84,11 +89,13 @@ class RNNBase(Module):
                         outputs_b.append(hx[0])
                     else:
                         outputs_b.append(hx)
+                outputs_b.reverse()
                 input = torch.cat([torch.stack(outputs_f).transpose(0, 1), torch.stack(outputs_b).transpose(0, 1)], 2)
                 outputs_f = []
                 outputs_b = []
             output = input, hx
         else:
+            outputs = []
             for t in range(time_steps):
                 x = input[:, t, :]
                 for num in range(self.num_layers):

@@ -33,15 +33,15 @@ pip install -r requirements.txt
     
     metaLSTM
         ----data
-            ----conll2003（保护CoNLL-2003BMES）
+            ----conll2003（保存CoNLL-2003，用BMES标注）
             ----embedding（词向量目录）
-        ----images (保存训练过程的图片)
+        ----images (图片)
         ----MNIST（在MNIST数据集上测试RNNs）
         ----models（保存训练好的模型）
-        ----Modules
+        ----Modules（RNNs, MetaRNNs, NormLSTM...）
         ----NER（主要实验的目录）
-            ----Module
-            ----utils
+            ----Module（char, encoder, crf, ner）
+            ----utils（配置文件，功能函数）
 
 ## 4 进展
 

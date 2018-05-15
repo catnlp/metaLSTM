@@ -27,6 +27,7 @@ class Config:
         self.tagScheme = 'NoSeg'
         self.word_features = 'BaseRNN' # 'RNN' / 'MetaRNN'
         self.char_features = 'LSTM'
+        self.optim = 'SGD'
 
         self.train_texts = []
         self.dev_texts = []
@@ -83,6 +84,7 @@ class Config:
         print("\tRaw instance number: %s" % (len(self.raw_texts)))
         print("\tHyper iteration: %s" % (self.iteration))
         print("\tHyper batch size: %s" % (self.batch_size))
+        print("\tHyper optimizer: %s" % (self.optim))
         print("\tHyper lr: %s" % (self.lr))
         print("\tHyper lr_decay: %s" % (self.lr_decay))
         print("\tHyper clip: %s" % (self.clip))

@@ -15,7 +15,6 @@ import torch
 import gc
 import pickle
 import torch.autograd as autograd
-import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import visdom
@@ -183,8 +182,22 @@ def train(data, name, save_dset, save_model_dir, seg=True):
     model = NER(data)
     if data.gpu:
         model = model.cuda()
-    loss_function = nn.NLLLoss()
-    optimizer = optim.SGD(model.parameters(), lr=data.lr, momentum=data.momentum)
+
+    if data.optim.lower() == 'adam':
+        optimizer = optim.Adam(model.parameters())
+    elif data.optim.lower() == 'rmsprop':
+        optimizer = optim.RMSprop(model.parameters())
+    elif data.optim.lower() == 'adadelta':
+        optimizer = optim.Adadelta(model.parameters())
+    elif data.optim.lower() == 'adagrad':
+        optimizer = optim.Adagrad(model.parameters())
+    elif data.optim.lower() == 'sgd':
+        optimizer = optim.SGD(model.parameters(), lr=data.lr, momentum=data.momentum)
+    else:
+        optimizer = None
+        print('Error optimizer selection, please check config.optim.')
+        exit(1)
+
     best_test = -1
     epoch = data.iteration
     vis = visdom.Visdom()
@@ -194,9 +207,9 @@ def train(data, name, save_dset, save_model_dir, seg=True):
         epoch_start = time.time()
         tmp_start = epoch_start
         print('Epoch: %s/%s' % (idx, epoch))
-        optimizer = lr_decay(optimizer, idx, data.lr_decay, data.lr)
+        if data.optim.lower() == 'sgd':
+            optimizer = lr_decay(optimizer, idx, data.lr_decay, data.lr)
         instance_count = 0
-        sample_id = 0
         sample_loss = 0
         total_loss = 0
         right_token = 0
@@ -305,3 +318,148 @@ def load_model_decode(model_dir, data, name, gpu, seg=True):
     else:
         print('%s: time: %.2f, speed: %.2ft/s; acc: %.4f' % (name, time_cost, speed, acc))
     return pred_results
+
+def test_optimizer(data):
+    print('---Test Optimizers---')
+    model_SGD = NER(data)
+    model_Adam = NER(data)
+    model_RMSprop = NER(data)
+    model_Adadelta = NER(data)
+    model_Adagrad = NER(data)
+
+    if data.gpu:
+        model_SGD = model_SGD.cuda()
+        model_Adam = model_Adam.cuda()
+        model_RMSprop = model_RMSprop.cuda()
+        model_Adadelta = model_Adadelta.cuda()
+        model_Adagrad = model_Adagrad.cuda()
+
+    optimizer_SGD = optim.SGD(model_SGD.parameters(), lr=data.lr, momentum=data.momentum)
+    optimizer_Adam = optim.Adam(model_Adam.parameters())
+    optimizer_RMSprop = optim.RMSprop(model_RMSprop.parameters())
+    optimizer_Adadelta = optim.Adadelta(model_Adadelta.parameters())
+    optimizer_Adagrad = optim.Adagrad(model_Adagrad.parameters())
+
+    epoch = data.iteration
+    vis = visdom.Visdom()
+    losses = []
+    train_F = [[0., 0., 0., 0., 0.]]
+    dev_F = [[0., 0., 0., 0., 0.]]
+    test_F = [[0., 0., 0., 0., 0.]]
+    for idx in range(epoch):
+        epoch_start = time.time()
+        print('Epoch: %s/%s' % (idx, epoch))
+
+        optimizer_SGD = lr_decay(optimizer_SGD, idx, data.lr_decay, data.lr)
+        instance_count = 0
+        sample_loss_SGD = 0
+        sample_loss_Adam = 0
+        sample_loss_RMSprop = 0
+        sample_loss_Adadelta = 0
+        sample_loss_Adagrad = 0
+        random.shuffle(data.train_ids)
+
+        model_SGD.train()
+        model_Adam.train()
+        model_RMSprop.train()
+        model_Adadelta.train()
+        model_Adagrad.train()
+        model_SGD.zero_grad()
+        model_Adam.zero_grad()
+        model_RMSprop.zero_grad()
+        model_Adadelta.zero_grad()
+        model_Adagrad.zero_grad()
+
+        batch_size = data.batch_size
+        train_num = len(data.train_ids)
+        total_batch = train_num // batch_size + 1
+        for batch_id in range(total_batch):
+            start = batch_id * batch_size
+            end = (batch_id+1) * batch_size
+            if end > train_num:
+                end = train_num
+            instance = data.train_ids[start: end]
+            if not instance:
+                continue
+            batch_word, batch_wordlen, batch_wordrecover, batch_char, batch_charlen, batch_charrecover, batch_label, mask = batchify_with_label(instance, data.gpu)
+            instance_count += 1
+            loss_SGD, tag_seq_SGD = model_SGD.neg_log_likelihood_loss(batch_word, batch_wordlen, batch_char, batch_charlen, batch_charrecover, batch_label, mask)
+            loss_Adam, tag_seq_Adam = model_Adam.neg_log_likelihood_loss(batch_word, batch_wordlen, batch_char, batch_charlen, batch_charrecover, batch_label, mask)
+            loss_RMSprop, tag_seq_RMSprop = model_RMSprop.neg_log_likelihood_loss(batch_word, batch_wordlen, batch_char, batch_charlen, batch_charrecover, batch_label, mask)
+            loss_Adadelta, tag_seq_Adadelta = model_Adadelta.neg_log_likelihood_loss(batch_word, batch_wordlen, batch_char, batch_charlen, batch_charrecover, batch_label, mask)
+            loss_Adagrad, tag_seq_Adagrad = model_Adagrad.neg_log_likelihood_loss(batch_word, batch_wordlen, batch_char, batch_charlen, batch_charrecover, batch_label, mask)
+
+            sample_loss_SGD += loss_SGD.data[0]
+            sample_loss_Adam += loss_Adam.data[0]
+            sample_loss_RMSprop += loss_RMSprop.data[0]
+            sample_loss_Adadelta += loss_Adadelta.data[0]
+            sample_loss_Adagrad += loss_Adagrad.data[0]
+
+            if end % 500 == 0:
+                sys.stdout.flush()
+                losses.append([sample_loss_SGD/50.0, sample_loss_Adam/50.0, sample_loss_RMSprop/50.0, sample_loss_Adadelta/50.0, sample_loss_Adagrad/50.0])
+                Lwin = 'Loss of Optimizers'
+                vis.line(np.array(losses), X=np.array([i for i in range(len(losses))]),
+                         win=Lwin, opts={'title': Lwin, 'legend': ['SGD', 'Adam', 'RMSprop', 'Adadelta', 'Adagrad']})
+                sample_loss_SGD = 0
+                sample_loss_Adam = 0
+                sample_loss_RMSprop = 0
+                sample_loss_Adadelta = 0
+                sample_loss_Adagrad = 0
+            loss_SGD.backward()
+            loss_Adam.backward()
+            loss_RMSprop.backward()
+            loss_Adadelta.backward()
+            loss_Adagrad.backward()
+            # if data.clip:
+            #     torch.nn.utils.clip_grad_norm(model.parameters(), 10.0)
+            optimizer_SGD.step()
+            optimizer_Adam.step()
+            optimizer_RMSprop.step()
+            optimizer_Adadelta.step()
+            optimizer_Adagrad.step()
+            model_SGD.zero_grad()
+            model_Adam.zero_grad()
+            model_RMSprop.zero_grad()
+            model_Adadelta.zero_grad()
+            model_Adagrad.zero_grad()
+
+        epoch_finish = time.time()
+        epoch_cost = epoch_finish - epoch_start
+        print('Epoch: %s training finished. Time: %.2fs, speed: %.2ft/s' % (idx, epoch_cost, train_num/epoch_cost))
+
+        speed, acc, p, r, f_train_SGD, _ = evaluate(data, model_SGD, 'train')
+        speed, acc, p, r, f_train_Adam, _ = evaluate(data, model_Adam, 'train')
+        speed, acc, p, r, f_train_RMSprop, _ = evaluate(data, model_RMSprop, 'train')
+        speed, acc, p, r, f_train_Adadelta, _ = evaluate(data, model_Adadelta, 'train')
+        speed, acc, p, r, f_train_Adagrad, _ = evaluate(data, model_Adagrad, 'train')
+
+        train_F.append([f_train_SGD*100, f_train_Adam*100, f_train_RMSprop*100, f_train_Adadelta*100, f_train_Adagrad*100])
+        train_Fwin = 'F1-score of Optimizers{train}'
+        vis.line(np.array(train_F), X=np.array([i for i in range(len(train_F))]),
+                 win=train_Fwin, opts={'title': train_Fwin, 'legend': ['SGD', 'Adam', 'RMSprop', 'Adadelta', 'Adagrad']})
+
+        speed, acc, p, r, f_dev_SGD, _ = evaluate(data, model_SGD, 'dev')
+        speed, acc, p, r, f_dev_Adam, _ = evaluate(data, model_Adam, 'dev')
+        speed, acc, p, r, f_dev_RMSprop, _ = evaluate(data, model_RMSprop, 'dev')
+        speed, acc, p, r, f_dev_Adadelta, _ = evaluate(data, model_Adadelta, 'dev')
+        speed, acc, p, r, f_dev_Adagrad, _ = evaluate(data, model_Adagrad, 'dev')
+
+        dev_F.append([f_dev_SGD * 100, f_dev_Adam * 100, f_dev_RMSprop * 100, f_dev_Adadelta * 100,
+                        f_dev_Adagrad * 100])
+        dev_Fwin = 'F1-score of Optimizers{dev}'
+        vis.line(np.array(dev_F), X=np.array([i for i in range(len(dev_F))]),
+                 win=dev_Fwin, opts={'title': dev_Fwin, 'legend': ['SGD', 'Adam', 'RMSprop', 'Adadelta', 'Adagrad']})
+
+        speed, acc, p, r, f_test_SGD, _ = evaluate(data, model_SGD, 'test')
+        speed, acc, p, r, f_test_Adam, _ = evaluate(data, model_Adam, 'test')
+        speed, acc, p, r, f_test_RMSprop, _ = evaluate(data, model_RMSprop, 'test')
+        speed, acc, p, r, f_test_Adadelta, _ = evaluate(data, model_Adadelta, 'test')
+        speed, acc, p, r, f_test_Adagrad, _ = evaluate(data, model_Adagrad, 'test')
+
+        test_F.append([f_test_SGD * 100, f_test_Adam * 100, f_test_RMSprop * 100, f_test_Adadelta * 100,
+                      f_test_Adagrad * 100])
+        test_Fwin = 'F1-score of Optimizers{test}'
+        vis.line(np.array(test_F), X=np.array([i for i in range(len(test_F))]),
+                 win=test_Fwin, opts={'title': test_Fwin, 'legend': ['SGD', 'Adam', 'RMSprop', 'Adadelta', 'Adagrad']})
+        gc.collect()

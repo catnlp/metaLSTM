@@ -123,11 +123,11 @@ CoNLL-2003是一个命名实体识别数据集，包含4类实体：PER, LOC, OR
 - 双向
 - 超参数
 
-Model | Hidden_size | LR | Bidirectional | F1
+Model | Hidden_size | LR Method | Bidirectional | F1
 :-: | :-: | :-: | :-: | :-:
-BaseLSTM | 200| 0.005 | True | 91.23
-LSTM | 200 | 0.015 | True | ?
-MetaLSTM | 200 | ? | True | ?
+BaseLSTM | 200| SGD(0.005) | True | 91.23
+LSTM | 200 | SGD(0.015) | True | 91.01
+MetaLSTM | 200 | SGD(0.015) | True | 90.42
 
 #### 5.3.2 梯度更新方法
 

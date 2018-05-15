@@ -4,7 +4,7 @@
 @Email: wk_nlp@163.com
 @Time: 2018/4/26 11:48
 '''
-from Module.RNNs import RNN
+from Modules.RNNs import RNN
 
 import torch
 import torch.nn as nn

@@ -4,7 +4,7 @@
 @Email: wk_nlp@163.com
 @Time: 2018/4/25 21:19
 '''
-from Module.assist import clip_grad
+from Modules.assist import clip_grad
 import math
 
 import torch

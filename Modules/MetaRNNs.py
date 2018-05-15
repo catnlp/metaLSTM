@@ -4,7 +4,7 @@
 @Email: wk_nlp@163.com
 @Time: 2018/4/25 21:19
 '''
-from Module import MetaRNNCells
+from Modules import MetaRNNCells
 
 import torch
 from torch.nn import Module
@@ -82,9 +82,9 @@ class MetaRNNBase(Module):
                     hx = getattr(self, 'cell{}'.format(num))(x, states[num])
                     states[num] = hx
                     if self.mode.startswith('MetaLSTM'):
-                        outputs_f.append(hx[0])
+                        outputs_f.append(hx[0][0])
                     else:
-                        outputs_f.append(hx)
+                        outputs_f.append(hx[0])
                 for t in range(time_steps)[::-1]:
                     x = input[:, t, :]
                     hx = getattr(self, 'cellb{}'.format(num))(x, states_b[num])

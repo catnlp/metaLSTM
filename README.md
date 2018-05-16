@@ -6,7 +6,7 @@
 
 Meta Learning for LSTM
 
-*我用PyCharm运行项目，远程连接服务器。如果直接通过命令行运行文件可能不行，会出现找不到包的问题。*
+*注：我用PyCharm运行项目，远程连接服务器。如果直接通过命令行运行文件可能不行，会出现找不到包的问题。*
 
 ## 1 参考资料
 
@@ -41,6 +41,7 @@ pip install -r requirements.txt
         ----Modules（RNNs, MetaRNNs, NormLSTM...）
         ----NER（主要实验的目录）
             ----Module（char, encoder, crf, ner）
+            ----Tests（测试Optimizers/Normalizations...）
             ----utils（配置文件，功能函数）
 
 ## 4 进展
@@ -126,12 +127,34 @@ CoNLL-2003是一个命名实体识别数据集，包含4类实体：PER, LOC, OR
 Model | Hidden_size | LR Method | Bidirectional | F1
 :-: | :-: | :-: | :-: | :-:
 BaseLSTM | 200| SGD(0.005) | True | 91.23
-LSTM | 200 | SGD(0.015) | True | 91.01
-MetaLSTM | 200 | SGD(0.015) | True | 90.42
+LSTM | 200 | SGD(0.015) | True | 91.04
+MetaLSTM | 200 | SGD(0.015) | True | 90.97
 
 #### 5.3.2 梯度更新方法
 
-- [ ] 实验结果
+**结论**
+
+- [x] 使用Adam，Loss下降最快
+- [x] SGD训练结果最好
+- [x] 我选择SGD
+
+**实验结果**
+
+- [x] Loss of Optimizers
+
+<p align="center"><img width="100%" src="images/optimizers/loss_optimizers.png" /></p>
+
+- [x] F1 of Optimizers{train}
+
+<p align="center"><img width="100%" src="images/optimizers/train_optimizers.png" /></p>
+
+- [x] F1 of Optimizers{dev}
+
+<p align="center"><img width="100%" src="images/optimizers/dev_optimizers.png" /></p>
+
+- [x] F1 of Optimizers{test}
+
+<p align="center"><img width="100%" src="images/optimizers/test_optimizers.png" /></p>
 
 #### 5.3.3 归一化方法
 

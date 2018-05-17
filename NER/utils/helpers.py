@@ -281,7 +281,7 @@ def train(data, name, save_dset, save_model_dir, seg=True):
                 print('Exceed previous best f score: ', best_test)
             else:
                 print('Exceed previous best acc score: ', best_test)
-            model_name = save_model_dir + '/' + name + '_model_' + str(idx)
+            model_name = save_model_dir + '/' + name
             torch.save(model.state_dict(), model_name)
             best_test = current_score
             with open(save_model_dir + '/' + name + '_eval_' + str(idx) + '.txt', 'w') as f:

@@ -175,6 +175,12 @@ Batch Norm | Batch Norm LSTM
 
 #### 5.3.6 多任务学习
 
+Dataset | STM | MTM
+:-: | :-: | :-:
+BioNLP13CG | 77.65 | ?
+BioNLP13PC | 82.99 | ?
+CRAFT | 70.92 | ?
+
 - [ ] 实验结果
 
 #### 5.3.7 元学习

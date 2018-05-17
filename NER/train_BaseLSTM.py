@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
         name = 'BaseLSTM'  # catnlp
         config = Config()
-        config.lr = 0.005
+        config.lr = 0.015
         config.hidden_dim = 200
         # config.clip = True
         config.number_normalized = True

@@ -83,6 +83,7 @@ if __name__ == '__main__':
 
         name = 'LSTM'  # catnlp
         config = Config()
+        config.char_features = 'CNN'
         config.lr = 0.015
         config.hidden_dim = 200
         config.bid_flag = True

@@ -96,7 +96,7 @@ class Encoder(nn.Module):
             out = out.transpose(1, 0)
         else:
             out, _ = self.encoder(word_embs)
-
+        out = self.drop(out) ## catnlp
         return out
 
     def get_output_score(self, word_inputs, word_seq_lengths, char_inputs, char_seq_lengths, char_seq_recover):

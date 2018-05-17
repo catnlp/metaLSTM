@@ -126,9 +126,9 @@ CoNLL-2003是一个命名实体识别数据集，包含4类实体：PER, LOC, OR
 
 Model | Hidden_size | LR Method | Bidirectional | F1
 :-: | :-: | :-: | :-: | :-:
-BaseLSTM | 200| SGD(0.005) | True | 91.23
-LSTM | 200 | SGD(0.015) | True | 91.04
-MetaLSTM | 200 | SGD(0.015) | True | 90.97
+BaseLSTM | 200| SGD(0.015) | True | 91.18
+LSTM | 200 | SGD(0.015) | True | 91.04/91.20(drop_lstm)
+MetaLSTM | 200 | SGD(0.015) | True | 90.97/90.54(drop_lstm)
 
 #### 5.3.2 梯度更新方法
 
@@ -157,6 +157,11 @@ MetaLSTM | 200 | SGD(0.015) | True | 90.97
 <p align="center"><img width="100%" src="images/optimizers/test_optimizers.png" /></p>
 
 #### 5.3.3 归一化方法
+
+Method | Detail
+:-: | :-:
+Dropout | 在encoder的输出加dropout
+Batch Norm | Batch Norm LSTM
 
 - [ ] 实验结果
 

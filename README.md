@@ -20,6 +20,12 @@ Meta Learning for LSTM
 - [x] [(8) Recurrent Batch Normalization](https://arxiv.org/pdf/1603.09025.pdf)
 - [x] [(9) batch_normalized_LSTM](https://github.com/sysuNie/batch_normalized_LSTM)
 - [x] [(10) Optimal Hyperparameters for Deep LSTM-Networks for Sequence Labeling Tasks](https://arxiv.org/pdf/1707.06799.pdf)
+- [x] [(11) MTL-Bioinformatics-2016](https://github.com/cambridgeltl/MTL-Bioinformatics-2016)
+- [x] [(12) BioNLP-2016](https://github.com/cambridgeltl/BioNLP-2016)
+- [x] [(13) How to Train good Word Embeddings for Biomedical NLP](https://aclweb.org/anthology/W/W16/W16-2922.pdf)
+- [x] [(14) A Neural Network Multi-Task Learning Approach to Biomedical Named Entity Recognitio](https://link.springer.com/article/10.1186/s12859-017-1776-8)
+- [x] [(15) Effective Neural Solution for Multi-Criteria Word Segmentation](https://arxiv.org/pdf/1712.02856.pdf)
+- [x] [(16) multi-criteria-cws](https://github.com/hankcs/multi-criteria-cws)
 
 ## 2 环境
 
@@ -42,6 +48,7 @@ pip install -r requirements.txt
         ----NER（主要实验的目录）
             ----Module（char, encoder, crf, ner）
             ----Tests（测试Optimizers/Normalizations...）
+                ----cellulars（在3个cellular数据集上测试多任务性能）
             ----utils（配置文件，功能函数）
 
 ## 4 进展
@@ -112,7 +119,7 @@ CoNLL-2003是一个命名实体识别数据集，包含4类实体：PER, LOC, OR
 
 ### 5.3 冲刺state of the art
 
-- [ ] 梯度更新方法（SGD, Adagrad, Adadelta, Adam, Nadam ...）
+- [x] 梯度更新方法（SGD, Adagrad, Adadelta, Adam, Nadam ...）
 - [ ] 归一化方法（Dropout, Batch, Layer）
 - [ ] 词向量（cove）
 - [ ] 注意力机制（待学习）
@@ -179,7 +186,7 @@ Dataset | STM | MTM
 :-: | :-: | :-:
 BioNLP13CG | 77.65 | ?
 BioNLP13PC | 82.99 | ?
-CRAFT | 70.92 | ?
+CRAFT | 72.65 | ?
 
 - [ ] 实验结果
 

@@ -6,26 +6,32 @@
 
 Meta Learning for LSTM
 
+项目从搭建RNNs和MetaRNNs开始，首先用Jupyter测试RNNs和MetaRNNs的输入输出，然后用MNIST数据集测试RNNs和MetaRNNs的性能，
+这些测试都是为了保证实现的RNNs和MetaRNNs基本正确，接着在CoNLL-2003数据集上进行NER实验，在这个过程中，需要保证RNNs性能和
+Pytorch库提供的RNNs性能相差不大。之后的实验慢慢迁移到多任务，用的数据集是公开的医学数据集。
+
 *注：我用PyCharm运行项目，远程连接服务器。如果直接通过命令行运行文件可能不行，会出现找不到包的问题。*
 
 ## 1 参考资料
 
-- [x] [(1) pytorch_workplace/rnn](https://github.com/DingKe/pytorch_workplace/tree/master/rnn)
-- [x] [(2) Pytorch Doc](http://pytorch.org/docs/0.3.1/)
-- [x] [(3) HyperNetworks](https://arxiv.org/pdf/1609.09106.pdf)
-- [x] [(4) supercell](https://github.com/hardmaru/supercell)
-- [x] [(5) Meta Multi-Task Learning for Sequence Modeling](https://arxiv.org/pdf/1802.08969.pdf)
-- [x] [(6) Optimization As a Model For Few-Shot Learning ](https://openreview.net/pdf?id=rJY0-Kcll)
-- [x] [(7) NCRF++](https://github.com/jiesutd/NCRFpp)
-- [x] [(8) Recurrent Batch Normalization](https://arxiv.org/pdf/1603.09025.pdf)
-- [x] [(9) batch_normalized_LSTM](https://github.com/sysuNie/batch_normalized_LSTM)
-- [x] [(10) Optimal Hyperparameters for Deep LSTM-Networks for Sequence Labeling Tasks](https://arxiv.org/pdf/1707.06799.pdf)
-- [x] [(11) MTL-Bioinformatics-2016](https://github.com/cambridgeltl/MTL-Bioinformatics-2016)
-- [x] [(12) BioNLP-2016](https://github.com/cambridgeltl/BioNLP-2016)
-- [x] [(13) How to Train good Word Embeddings for Biomedical NLP](https://aclweb.org/anthology/W/W16/W16-2922.pdf)
-- [x] [(14) A Neural Network Multi-Task Learning Approach to Biomedical Named Entity Recognitio](https://link.springer.com/article/10.1186/s12859-017-1776-8)
-- [x] [(15) Effective Neural Solution for Multi-Criteria Word Segmentation](https://arxiv.org/pdf/1712.02856.pdf)
-- [x] [(16) multi-criteria-cws](https://github.com/hankcs/multi-criteria-cws)
+感谢作者们的辛苦付出，让我有幸搬砖 :-P
+
+- [x] [(1)[代码] pytorch_workplace/rnn](https://github.com/DingKe/pytorch_workplace/tree/master/rnn)
+- [x] [(2)[文档] Pytorch Doc](http://pytorch.org/docs/0.3.1/)
+- [x] [(3)[论文] HyperNetworks](https://arxiv.org/pdf/1609.09106.pdf)
+- [x] [(4)[代码] supercell](https://github.com/hardmaru/supercell)
+- [x] [(5)[论文] Meta Multi-Task Learning for Sequence Modeling](https://arxiv.org/pdf/1802.08969.pdf)
+- [x] [(6)[论文] Optimization As a Model For Few-Shot Learning ](https://openreview.net/pdf?id=rJY0-Kcll)
+- [x] [(7)[代码] NCRF++](https://github.com/jiesutd/NCRFpp)
+- [x] [(8)[论文] Recurrent Batch Normalization](https://arxiv.org/pdf/1603.09025.pdf)
+- [x] [(9)[代码] batch_normalized_LSTM](https://github.com/sysuNie/batch_normalized_LSTM)
+- [x] [(10)[论文] Optimal Hyperparameters for Deep LSTM-Networks for Sequence Labeling Tasks](https://arxiv.org/pdf/1707.06799.pdf)
+- [x] [(11)[数据集] MTL-Bioinformatics-2016](https://github.com/cambridgeltl/MTL-Bioinformatics-2016)
+- [x] [(12)[代码] BioNLP-2016](https://github.com/cambridgeltl/BioNLP-2016)
+- [x] [(13)[论文] How to Train good Word Embeddings for Biomedical NLP](https://aclweb.org/anthology/W/W16/W16-2922.pdf)
+- [x] [(14)[论文] A Neural Network Multi-Task Learning Approach to Biomedical Named Entity Recognitio](https://link.springer.com/article/10.1186/s12859-017-1776-8)
+- [x] [(15)[论文] Effective Neural Solution for Multi-Criteria Word Segmentation](https://arxiv.org/pdf/1712.02856.pdf)
+- [x] [(16)[代码] multi-criteria-cws](https://github.com/hankcs/multi-criteria-cws)
 
 ## 2 环境
 
@@ -41,6 +47,12 @@ pip install -r requirements.txt
         ----data
             ----conll2003（保存CoNLL-2003，用BMES标注）
             ----embedding（词向量目录）
+            ----cellular（有关细胞的数据集）
+                ----BioNLP13CG-IOBES
+                ----BioNLP13PC-IOBES
+                ----CRAFT-IOBES
+                ----jointCellulars（用于加标签的多任务学习的数据集）
+            ----multiDatasets（从资料11中下载的数据集）
         ----images (图片)
         ----MNIST（在MNIST数据集上测试RNNs）
         ----models（保存训练好的模型）
@@ -59,7 +71,8 @@ pip install -r requirements.txt
 - [x] 在MNIST上测试MetaRNNs
 - [x] 在CoNLL-2003上测试RNNs
 - [x] 在CoNLL-2003上测试MetaRNNs
-- [ ] 冲刺state of the art
+- [ ] NER冲刺state of the art
+- [ ] 展现MetaLSTM的迁移能力
 
 ## 5 实验
 
@@ -185,8 +198,22 @@ Batch Norm | Batch Norm LSTM
 Dataset | STM | MTM
 :-: | :-: | :-:
 BioNLP13CG | 77.65 | ?
-BioNLP13PC | 82.99 | ?
-CRAFT | 72.65 | ?
+BioNLP13PC | 83.28 | ?
+CRAFT | 76.59 | ?
+
+**加标签**
+将BioNLP13CG、BioNLP13PC和CRAFT三个数据集合并成一个，通过在句子首尾加标签的方式进行区分，例如：
+
+    <BioNLP13CG>	S-BioNLP13CG
+    This	O
+    may	O
+    reflect	O
+    a	O
+    transition	O
+    ...
+    </BioNLP13CG>	S-BioNLP13CG
+
+在打分的时候，将这些标签去掉。
 
 - [ ] 实验结果
 
@@ -194,7 +221,9 @@ CRAFT | 72.65 | ?
 
 - [ ] 实验结果
 
-## 6 体会
+## 6 MetaLSTM的迁移能力
+
+## 7 体会
 
 - [x] SGD训练，学习率lr设置很重要，过大容易训练不了
 - [x] LSTM比RNN及其变种更容易训练，即使学习率lr设置过大

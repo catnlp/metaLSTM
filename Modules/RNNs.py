@@ -11,15 +11,13 @@ from torch.nn import Module
 from torch.autograd import Variable
 
 class RNNBase(Module):
-    def __init__(self, mode, input_size, hidden_size, num_layers, recurrent_size=None, bias=True, grad_clip=None, gpu=False, bidirectional=False):
+    def __init__(self, mode, input_size, hidden_size, num_layers, bias=True, gpu=False, bidirectional=False):
         super(RNNBase, self).__init__()
         self.mode = mode
         self.input_size = input_size
         self.hidden_size = hidden_size
-        self.recurrent_size = recurrent_size
         self.num_layers = num_layers
         self.bias = bias
-        self.grad_clip = grad_clip
         self.gpu = gpu
         self.bidirectional = bidirectional
 
@@ -30,8 +28,7 @@ class RNNBase(Module):
 
         kwargs = {'input_size': input_size,
                   'hidden_size': hidden_size,
-                  'bias': bias,
-                  'grad_clip': grad_clip}
+                  'bias': bias}
 
         if self.bidirectional:
             self.cell0 = Cell(**kwargs)

@@ -39,7 +39,7 @@ def predict_check(pred_variable, gold_variable, mask_variable):
     total_token = mask.sum()
     return right_token, total_token
 
-def recover_label(pred_variable, gold_variable, mask_variable, label_alphabet, word_recover):
+def recover_label(pred_variable, gold_variable, mask_variable, label_alphabet, word_recover, ignore=False):
     pred_variable = pred_variable[word_recover]
     gold_variable = gold_variable[word_recover]
     mask_variable = mask_variable[word_recover]
@@ -51,14 +51,29 @@ def recover_label(pred_variable, gold_variable, mask_variable, label_alphabet, w
     # batch_size = mask.shape[0]
     pred_label = []
     gold_label = []
+    tag_label = []
+    dict = {}
     for idx in range(batch_size):
         pred = [label_alphabet.get_instance(pred_tag[idx][idy]) for idy in range(seq_len) if mask[idx][idy] != 0]
         gold = [label_alphabet.get_instance(gold_tag[idx][idy]) for idy in range(seq_len) if mask[idx][idy] != 0]
         assert(len(pred) == len(gold))
-        pred_label.append(pred)
-        gold_label.append(gold)
+        if ignore:
+            if (pred[0] != pred[-1]):
+                print('Error datasets!')
+                exit(1)
+            tag = pred[0][2: ]
+            if tag not in tag_label:
+                dict[tag] = [[], []]
+                tag_label.append(tag)
+            dict[tag][0].append(pred[1: -1])
+            dict[tag][1].append(gold[1: -1])
+            pred_label.append(pred[1: -1])
+            gold_label.append(gold[1: -1])
+        else:
+            pred_label.append(pred)
+            gold_label.append(gold)
 
-    return pred_label, gold_label
+    return pred_label, gold_label, dict
 
 def save_data_setting(data, save_file):
     new_data = copy.deepcopy(data)
@@ -90,7 +105,7 @@ def lr_decay(optimizer, epoch, decay_rate, init_lr):
         param_group['lr'] = lr
     return optimizer
 
-def evaluate(data, model, name):
+def evaluate(data, model, name, ignore=False):
     if name == 'train':
         instances = data.train_ids
     elif name == 'dev':
@@ -105,6 +120,8 @@ def evaluate(data, model, name):
 
     pred_results = []
     gold_results = []
+    dict_results = {}
+    tag_label = []
 
     model.eval()
     batch_size = data.batch_size
@@ -121,13 +138,29 @@ def evaluate(data, model, name):
             continue
         batch_word, batch_wordlen, batch_wordrecover, batch_char, batch_charlen, batch_charrecover, batch_label, mask = batchify_with_label(instance, data.gpu, True)
         tag_seq = model(batch_word, batch_wordlen, batch_char, batch_charlen, batch_charrecover, mask)
-        pred_label, gold_label = recover_label(tag_seq, batch_label, mask, data.label_alphabet, batch_wordrecover)
+        pred_label, gold_label, dict_label = recover_label(tag_seq, batch_label, mask, data.label_alphabet, batch_wordrecover, ignore)
         pred_results += pred_label
         gold_results += gold_label
+        if dict_label:
+            for key, value in dict_label.items():
+                if key not in tag_label:
+                    dict_results[key] = [[], []]
+                    tag_label.append(key)
+                dict_results[key][0] += value[0]
+                dict_results[key][1] += value[1]
+
+
+    acc, p, r, f = get_ner_fmeasure(gold_results, pred_results, data.tagScheme)
+
+    f_results = {}
+    if dict_results:
+        for key, value in dict_results.items():
+            _, _, _, dict_f = get_ner_fmeasure(value[0], value[1], data.tagScheme)
+            f_results[key] = dict_f
+
     decode_time = time.time() - start_time
     speed = len(instances) / decode_time
-    acc, p, r, f = get_ner_fmeasure(gold_results, pred_results, data.tagScheme)
-    return speed, acc, p, r, f, pred_results
+    return speed, acc, p, r, f, f_results
 
 def batchify_with_label(input_batch_list, gpu, volatile_flag=False):
     batch_size = len(input_batch_list)
@@ -174,7 +207,7 @@ def batchify_with_label(input_batch_list, gpu, volatile_flag=False):
         mask = mask.cuda()
     return word_seq_tensor, word_seq_lengths, word_seq_recover, char_seq_tensor, char_seq_lengths, char_seq_recover, label_seq_tensor, mask
 
-def train(data, name, save_dset, save_model_dir, seg=True):
+def train(data, name, save_dset, save_model_dir, seg=True, ignore=False):
     print('---Training model---')
     data.show_data_summary()
     save_data_name = save_dset
@@ -203,6 +236,8 @@ def train(data, name, save_dset, save_model_dir, seg=True):
     vis = visdom.Visdom()
     losses = []
     all_F = [[0., 0., 0.]]
+    dict_F = {}
+    label_F = []
     for idx in range(epoch):
         epoch_start = time.time()
         tmp_start = epoch_start
@@ -262,9 +297,10 @@ def train(data, name, save_dset, save_model_dir, seg=True):
         epoch_cost = epoch_finish - epoch_start
         print('Epoch: %s training finished. Time: %.2fs, speed: %.2ft/s, total_loss: %s'
               % (idx, epoch_cost, train_num/epoch_cost, total_loss))
-        speed, acc, p, r, f_train, _ = evaluate(data, model, 'train')
-        speed, acc, p, r, f_dev, _ = evaluate(data, model, 'dev')
-        speed, acc, p, r, f_test, _ = evaluate(data, model, 'test')
+        speed, acc, p, r, f_train, dict_train = evaluate(data, model, 'train', ignore=ignore)
+        speed, acc, p, r, f_dev, dict_dev = evaluate(data, model, 'dev', ignore=ignore)
+        speed, acc, p, r, f_test, dict_test = evaluate(data, model, 'test', ignore=ignore)
+
         test_finish = time.time()
         test_cost = test_finish - epoch_finish
 
@@ -300,6 +336,16 @@ def train(data, name, save_dset, save_model_dir, seg=True):
         Fwin = 'F1-score of ' + name + ' {train, dev, test}'
         vis.line(np.array(all_F), X=np.array([i for i in range(len(all_F))]),
                  win=Fwin, opts={'title': Fwin, 'legend': ['train', 'dev', 'test']})
+
+        if dict_train:
+            for key, value in dict_train.items():
+                if key not in label_F:
+                    dict_F[key] = [[0., 0., 0.]]
+                    label_F.append(key)
+                dict_F[key].append([dict_train[key]*100.0, dict_dev[key]*100.0, dict_test[key]*100.0])
+                Fwin = 'F1-score of ' + name + '_' + key + ' {train, dev, test}'
+                vis.line(np.array(dict_F[key]), X=np.array([i for i in range(len(dict_F[key]))]),
+                         win=Fwin, opts={'title': Fwin, 'legend': ['train', 'dev', 'test']})
         gc.collect()
 
 def load_model_decode(model_dir, data, name, gpu, seg=True):

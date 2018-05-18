@@ -4,7 +4,6 @@
 @Email: wk_nlp@163.com
 @Time: 2018/4/24 19:35
 '''
-from Modules.assist import clip_grad
 import math
 
 import torch
@@ -25,11 +24,10 @@ class RNNCellBase(Module):
 @Math: h' = tanh(w_{ih}x  + w_{hh}h + b)
 '''
 class RNNCell(RNNCellBase):
-    def __init__(self, input_size, hidden_size, bias=True, grad_clip=None):
+    def __init__(self, input_size, hidden_size, bias=True):
         super(RNNCell, self).__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size
-        self.grad_clip = grad_clip
 
         self.weight_ih = Parameter(torch.Tensor(hidden_size, input_size))
         self.weight_hh = Parameter(torch.Tensor(hidden_size, hidden_size))
@@ -47,8 +45,6 @@ class RNNCell(RNNCellBase):
 
     def forward(self, input, h):
         output = F.linear(input, self.weight_ih) + F.linear(h, self.weight_hh) + self.bias
-        if self.grad_clip:
-            output = clip_grad(output, -self.grad_clip, self.grad_clip)
         output = F.relu(output)
 
         return output
@@ -62,11 +58,10 @@ c' = f * c + i * g
 h' = o * tanh(c')
 '''
 class LSTMCell(RNNCellBase):
-    def __init__(self, input_size, hidden_size, bias=True, grad_clip=None):
+    def __init__(self, input_size, hidden_size, bias=True):
         super(LSTMCell, self).__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size
-        self.grad_clip = grad_clip
 
         self.weight_ih = Parameter(torch.Tensor(4 * hidden_size, input_size))
         self.weight_hh = Parameter(torch.Tensor(4 * hidden_size, hidden_size))
@@ -86,8 +81,6 @@ class LSTMCell(RNNCellBase):
         h, c = hx
 
         pre = F.linear(input, self.weight_ih) + F.linear(h, self.weight_hh) + self.bias
-        if self.grad_clip:
-            pre = clip_grad(pre, -self.grad_clip, self.grad_clip)
 
         i = F.sigmoid(pre[:, : self.hidden_size])
         f = F.sigmoid(pre[:, self.hidden_size: self.hidden_size * 2])

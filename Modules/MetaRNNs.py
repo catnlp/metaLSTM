@@ -11,18 +11,16 @@ from torch.nn import Module
 from torch.autograd import Variable
 
 class MetaRNNBase(Module):
-    def __init__(self, mode, input_size, hidden_size, hyper_hidden_size, hyper_embedding_size, num_layers, recurrent_size=None, bias=True, bias_hyper=True, grad_clip=None, gpu=False, bidirectional=False):
+    def __init__(self, mode, input_size, hidden_size, hyper_hidden_size, hyper_embedding_size, num_layers, bias=True, bias_hyper=True, gpu=False, bidirectional=False):
         super(MetaRNNBase, self).__init__()
         self.mode = mode
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.hyper_hidden_size = hyper_hidden_size
         self.hyper_embedding_size = hyper_embedding_size
-        self.recurrent_size = recurrent_size
         self.num_layers = num_layers
         self.bias = bias
         self.bias_hyper = bias_hyper
-        self.grad_clip = grad_clip
         self.gpu = gpu
         self.bidirectional=bidirectional
 
@@ -36,8 +34,7 @@ class MetaRNNBase(Module):
                   'hyper_hidden_size': hyper_hidden_size,
                   'hyper_embedding_size': hyper_embedding_size,
                   'bias': bias,
-                  'bias_hyper': bias_hyper,
-                  'grad_clip': grad_clip}
+                  'bias_hyper': bias_hyper}
 
         if self.bidirectional:
             self.cell0 = Cell(**kwargs)

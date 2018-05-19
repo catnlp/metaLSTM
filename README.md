@@ -197,9 +197,9 @@ Batch Norm | Batch Norm LSTM
 
 Dataset | STM | MTM
 :-: | :-: | :-:
-BioNLP13CG | 77.65 | ?
-BioNLP13PC | 83.28 | ?
-CRAFT | 76.59 | ?
+BioNLP13CG | 77.65 | 78.45
+BioNLP13PC | 83.28 | 82.49
+CRAFT | 76.59 | 78.61
 
 **加标签**
 将BioNLP13CG、BioNLP13PC和CRAFT三个数据集合并成一个，通过在句子首尾加标签的方式进行区分，例如：

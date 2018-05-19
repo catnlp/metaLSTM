@@ -133,10 +133,10 @@ CoNLL-2003是一个命名实体识别数据集，包含4类实体：PER, LOC, OR
 ### 5.3 冲刺state of the art
 
 - [x] 梯度更新方法（SGD, Adagrad, Adadelta, Adam, Nadam ...）
-- [ ] 归一化方法（Dropout, Batch, Layer）
+- [x] 归一化方法（Dropout, Batch, Layer）
 - [ ] 词向量（cove）
 - [ ] 注意力机制（待学习）
-- [ ] 多任务学习（加标签）
+- [x] 多任务学习（加标签）
 - [ ] 元学习（学习率更新）
 
 #### 5.3.1 模型最优
@@ -215,7 +215,13 @@ CRAFT | 76.59 | 78.61
 
 在打分的时候，将这些标签去掉。
 
-- [ ] 实验结果
+- [x] 实验结果
+
+<p align="center"><img width="100%" src="images/cellulars/cellulars1.PNG" /></p>
+
+<p align="center"><img width="100%" src="images/cellulars/cellulars2.PNG" /></p>
+
+<p align="center"><img width="100%" src="images/cellulars/cellulars3.PNG" /></p>
 
 #### 5.3.7 元学习
 

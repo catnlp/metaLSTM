@@ -32,6 +32,8 @@ Pytorch库提供的RNNs性能相差不大。之后的实验慢慢迁移到多任
 - [x] [(14)[论文] A Neural Network Multi-Task Learning Approach to Biomedical Named Entity Recognitio](https://link.springer.com/article/10.1186/s12859-017-1776-8)
 - [x] [(15)[论文] Effective Neural Solution for Multi-Criteria Word Segmentation](https://arxiv.org/pdf/1712.02856.pdf)
 - [x] [(16)[代码] multi-criteria-cws](https://github.com/hankcs/multi-criteria-cws)
+- [x] [(17)[代码] CoVe](https://github.com/salesforce/cove)
+- [x] [(18)[论文] Learned in Translation: Contextualized Word Vectors](https://arxiv.org/pdf/1708.00107.pdf)
 
 ## 2 环境
 
@@ -134,7 +136,7 @@ CoNLL-2003是一个命名实体识别数据集，包含4类实体：PER, LOC, OR
 
 - [x] 梯度更新方法（SGD, Adagrad, Adadelta, Adam, Nadam ...）
 - [x] 归一化方法（Dropout, Batch, Layer）
-- [ ] 词向量（cove）
+- [x] 词向量（cove）
 - [ ] 注意力机制（待学习）
 - [x] 多任务学习（加标签）
 - [ ] 元学习（学习率更新）
@@ -183,11 +185,16 @@ Method | Detail
 Dropout | 在encoder的输出加dropout
 Batch Norm | Batch Norm LSTM
 
-- [ ] 实验结果
-
 #### 5.3.4 词向量
 
-- [ ] 实验结果
+Model | Hidden_size| Layer | Embed Dict | F1
+:-: | :-: | :-: | :-: | :-:
+LSTM | 600 | 2 | golve.840B.300d | 90.22
+LSTM | 600 | 2 | CoVe | 87.57
+
+- [x] 实验结果
+
+in process
 
 #### 5.3.5 注意力机制
 

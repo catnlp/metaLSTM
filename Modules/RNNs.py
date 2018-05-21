@@ -37,6 +37,7 @@ class RNNBase(Module):
                 cell = Cell(**kwargs)
                 setattr(self, 'cell{}'.format(i), cell)
 
+            kwargs['input_size'] = input_size
             self.cellb0 = Cell(**kwargs)
             for i in range(1, num_layers):
                 kwargs['input_size'] = hidden_size * 2
@@ -67,7 +68,6 @@ class RNNBase(Module):
             states_b = self._initial_states(input.size(0))
             outputs_f = []
             outputs_b = []
-            hx = None
 
             for num in range(self.num_layers):
                 for t in range(time_steps):
@@ -90,7 +90,7 @@ class RNNBase(Module):
                 input = torch.cat([torch.stack(outputs_f).transpose(0, 1), torch.stack(outputs_b).transpose(0, 1)], 2)
                 outputs_f = []
                 outputs_b = []
-            output = input, hx
+            output = input, input[-1]
         else:
             outputs = []
             for t in range(time_steps):

@@ -207,12 +207,12 @@ def batchify_with_label(input_batch_list, gpu, volatile_flag=False):
         mask = mask.cuda()
     return word_seq_tensor, word_seq_lengths, word_seq_recover, char_seq_tensor, char_seq_lengths, char_seq_recover, label_seq_tensor, mask
 
-def train(data, name, save_dset, save_model_dir, seg=True, ignore=False):
+def train(data, name, save_dset, save_model_dir, seg=True, ignore=False, cove_flag=False):
     print('---Training model---')
     data.show_data_summary()
     save_data_name = save_dset
     save_data_setting(data, save_data_name)
-    model = NER(data)
+    model = NER(data, cove_flag)
     if data.gpu:
         model = model.cuda()
 

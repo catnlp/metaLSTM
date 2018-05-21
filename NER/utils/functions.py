@@ -108,9 +108,15 @@ def load_pretrain_emb(embedding_path):
             tokens = line.split()
             if embed_dim < 0:
                 embed_dim = len(tokens) - 1
-            else:
-                assert(embed_dim + 1 == len(tokens))
+            # else:
+            #     if(len(tokens) != embed_dim + 1):
+            #         print(tokens)
+            #     assert(embed_dim + 1 == len(tokens))
             embed = np.empty([1, embed_dim])
-            embed[:] = tokens[1: ]
-            embed_dict[tokens[0]] = embed # catnlp
+            embed[:] = tokens[len(tokens) - embed_dim: ]
+            name = tokens[0]
+            size = len(tokens) - embed_dim - 1
+            for i in range(size):
+                name += ' ' + tokens[i+1]
+            embed_dict[name] = embed # catnlp
     return embed_dict, embed_dim

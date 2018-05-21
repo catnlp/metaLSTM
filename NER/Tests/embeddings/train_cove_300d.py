@@ -2,7 +2,7 @@
 '''
 @Author: catnlp
 @Email: wk_nlp@163.com
-@Time: 2018/5/17 14:57
+@Time: 2018/5/21 12:50
 '''
 from NER.utils.config import Config
 from NER.utils.helpers import *
@@ -23,14 +23,14 @@ os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Tuning with NER')
-    parser.add_argument('--wordemb', help='Embedding for words', default='glove')
+    parser.add_argument('--wordemb', help='Embedding for words', default='glove300d')
     parser.add_argument('--charemb', help='Embedding for chars', default='None')
     parser.add_argument('--status', choices=['train', 'test', 'decode'], help='update algorithm', default='train')
-    parser.add_argument('--savemodel', default='../../../models/multiDatasets/cellulars/BioNLP13CG') # catnlp
-    parser.add_argument('--savedset', help='Dir of saved data setting', default='../../../models/multiDatasets/cellulars/BioNLP13CG.dset') # catnlp
-    parser.add_argument('--train', default='../../../data/cellular/BioNLP13CG-IOBES/train.tsv') # catnlp
-    parser.add_argument('--dev', default='../../../data/cellular/BioNLP13CG-IOBES/devel.tsv') # catnlp
-    parser.add_argument('--test', default='../../../data/cellular/BioNLP13CG-IOBES/test.tsv') # catnlp
+    parser.add_argument('--savemodel', default='../../../models/multiEmbeddings/cove300d') # catnlp
+    parser.add_argument('--savedset', help='Dir of saved data setting', default='../../../models/multiEmbeddings/cove300d.dset') # catnlp
+    parser.add_argument('--train', default='../../../data/conll2003/train.bmes') # catnlp
+    parser.add_argument('--dev', default='../../../data/conll2003/dev.bmes') # catnlp
+    parser.add_argument('--test', default='../../../data/conll2003/test.bmes') # catnlp
     parser.add_argument('--gpu', default='True')
     parser.add_argument('--seg', default='True')
     parser.add_argument('--extendalphabet', default='True')
@@ -76,6 +76,8 @@ if __name__ == '__main__':
         print('Word Embedding: ', emb)
         if emb == 'glove':
             emb_file = '../../../data/embedding/glove.6B.100d.txt'
+        elif emb == 'glove300d':
+            emb_file = '../../../data/embedding/glove.840B.300d.txt'
         else:
             emb_file = None
         char_emb_file = args.charemb.lower()
@@ -86,8 +88,8 @@ if __name__ == '__main__':
         config.layers = 2
         config.optim = 'Adam'
         config.char_features = 'CNN'
-        config.lr = 0.015
-        config.hidden_dim = 200
+        config.word_emb_dim = 300
+        config.hidden_dim = 600
         config.bid_flag = True
         config.number_normalized = True
         data_initialization(config, train_file, dev_file, test_file)
@@ -104,8 +106,8 @@ if __name__ == '__main__':
             print('load char emb file...norm: ', config.norm_char_emb)
             config.build_char_pretrain_emb(char_emb_file)
 
-        name = 'BioNLP13CG' # catnlp
-        train(config, name, dset_dir, save_model_dir, seg)
+        name = 'cove300d' # catnlp
+        train(config, name, dset_dir, save_model_dir, seg, cove_flag=True)
     elif status == 'test':
         data = load_data_setting(dset_dir)
         data.generate_instance(dev_file, 'dev')

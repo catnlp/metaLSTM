@@ -149,7 +149,6 @@ def evaluate(data, model, name, ignore=False):
                 dict_results[key][0] += value[0]
                 dict_results[key][1] += value[1]
 
-
     acc, p, r, f = get_ner_fmeasure(gold_results, pred_results, data.tagScheme)
 
     if f == -1:
@@ -159,6 +158,8 @@ def evaluate(data, model, name, ignore=False):
     if dict_results:
         for key, value in dict_results.items():
             _, _, _, dict_f = get_ner_fmeasure(value[0], value[1], data.tagScheme)
+            if dict_f == -1:
+                dict_f = 0
             f_results[key] = dict_f
 
     decode_time = time.time() - start_time

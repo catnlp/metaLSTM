@@ -81,7 +81,7 @@ if __name__ == '__main__':
         char_emb_file = args.charemb.lower()
         print('Char Embedding: ', char_emb_file)
 
-        name = 'LSTM'  # catnlp
+        name = 'BaseLSTM'  # catnlp
         config = Config()
         config.layers = 2
         config.optim = 'Adam'
@@ -104,7 +104,7 @@ if __name__ == '__main__':
             print('load char emb file...norm: ', config.norm_char_emb)
             config.build_char_pretrain_emb(char_emb_file)
 
-        name = 'BC4CHEMD' # catnlp
+        name = 'BC4CHEMD-chem' # catnlp
         train(config, name, dset_dir, save_model_dir, seg)
     elif status == 'test':
         data = load_data_setting(dset_dir)

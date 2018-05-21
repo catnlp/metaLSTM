@@ -81,7 +81,7 @@ if __name__ == '__main__':
         char_emb_file = args.charemb.lower()
         print('Char Embedding: ', char_emb_file)
 
-        name = 'LSTM'  # catnlp
+        name = 'BaseLSTM'  # catnlp
         config = Config()
         config.layers = 2
         config.optim = 'Adam'

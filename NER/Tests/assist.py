@@ -38,7 +38,7 @@ def make_jointCorpus(dataset, name, dirList):
             addContent(testF, dir+'/test.tsv', tag)
 
 if __name__ == "__main__":
-    dataset = '../../data/cellular'
-    name = 'jointCellulars'
-    dirList = ['BioNLP13CG', 'BioNLP13PC', 'CRAFT']
+    dataset = '../../data/group/species'
+    name = 'joint-species'
+    dirList = ['BioNLP11ID-species', 'BioNLP13CG-species', 'CRAFT-species', 'linnaeus']
     make_jointCorpus(dataset, name, dirList)

@@ -66,6 +66,8 @@ def get_ner_BMES(label_list):
     tag_list = []
     stand_matrix = []
     for i in range(0, list_len):
+        if label_list[i] is None:
+            print(label_list)
         current_label = label_list[i].upper()
         if begin_label in current_label:
             if index_tag != '':

@@ -152,6 +152,9 @@ def evaluate(data, model, name, ignore=False):
 
     acc, p, r, f = get_ner_fmeasure(gold_results, pred_results, data.tagScheme)
 
+    if f == -1:
+        f = 0
+
     f_results = {}
     if dict_results:
         for key, value in dict_results.items():

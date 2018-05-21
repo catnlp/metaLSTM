@@ -189,12 +189,12 @@ Batch Norm | Batch Norm LSTM
 
 Model | Hidden_size| Layer | Embed Dict | F1
 :-: | :-: | :-: | :-: | :-:
-LSTM | 600 | 2 | golve.840B.300d | 90.22
+LSTM | 600 | 2 | golve.840B.300d | 90.35
 LSTM | 600 | 2 | CoVe | 87.57
 
 - [x] 实验结果
 
-in process
+<p align="center"><img width="100%" src="images/embeddings/embedding_glove_cove-300.PNG" /></p>
 
 #### 5.3.5 注意力机制
 
@@ -207,6 +207,8 @@ Dataset | STM | MTM
 BioNLP13CG | 77.65 | 78.45
 BioNLP13PC | 83.28 | 82.49
 CRAFT | 76.59 | 78.61
+
+更多实验（in process）
 
 **加标签**
 将BioNLP13CG、BioNLP13PC和CRAFT三个数据集合并成一个，通过在句子首尾加标签的方式进行区分，例如：

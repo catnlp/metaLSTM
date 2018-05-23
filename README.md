@@ -200,11 +200,12 @@ LSTM | 600 | 2 | CoVe | 87.57
 
 Dataset | STM | MTM
 :-: | :-: | :-:
-BioNLP13CG | 77.65 | *78.45*
-BioNLP13PC | 83.28 | 82.49
-CRAFT | 76.59 | *78.61*
+BioNLP13CG | 77.65 | **78.45**
+BioNLP13PC | **83.28** | 82.49
+CRAFT | 76.59 | **78.61**
 
 **加标签**
+
 将BioNLP13CG、BioNLP13PC和CRAFT三个数据集合并成一个，通过在句子首尾加标签的方式进行区分，例如：
 
     <BioNLP13CG>	S-BioNLP13CG
@@ -228,47 +229,47 @@ CRAFT | 76.59 | *78.61*
 
 - [x] 补充实验
 
-*Cellular component group*
+**Cellular component group**
 
 Dataset | STM | MTM
 :-: | :-: | :-:
-BioNLP13CG-cc | *74.72* | 70.81
-BioNLP13PC-cc | *88.17* | 81.17
-CRAFT-cc | 64.24 | *65.65*
+BioNLP13CG-cc | **74.72** | 70.81
+BioNLP13PC-cc | **88.17** | 81.17
+CRAFT-cc | 64.24 | **65.65**
 
-*Cell group*
-
-Dataset | STM | MTM
-:-: | :-: | :-:
-BioNLP13CG-cell | *85.61* | 81.75
-CRAFT-cell | *89.33* | 88.79
-
-*Chemical group*
+**Cell group**
 
 Dataset | STM | MTM
 :-: | :-: | :-:
-BC4CHEMD | *82.90* | 82.10
-BC5CDR-chem | 84.80 | *87.32*
-BioNLP11ID-chem | *64.89* | 58.30
-BioNLP13CG-chem | 66.15 | *72.78*
-BioNLP13PC-chem | *74.27* | 70.80
-CRAFT-chem | *80.48* | 79.34
+BioNLP13CG-cell | **85.61** | 81.75
+CRAFT-cell | **89.33** | 88.79
 
-*Disease group*
+**Chemical group**
 
 Dataset | STM | MTM
 :-: | :-: | :-:
-BC5CDR-disease | 78.18 | *78.25*
-NCBI-disease | *85.62* | 83.44
+BC4CHEMD | **82.90** | 82.10
+BC5CDR-chem | 84.80 | **87.32**
+BioNLP11ID-chem | **64.89** | 58.30
+BioNLP13CG-chem | 66.15 | **72.78**
+BioNLP13PC-chem | **74.27** | 70.80
+CRAFT-chem | **80.48** | 79.34
 
-*Species group*
+**Disease group**
 
 Dataset | STM | MTM
 :-: | :-: | :-:
-BioNLP11ID-species | *68.80* | 66.93
-BioNLP13CG-species | 79.80 | *80.08*
-CRAFT-species | 97.84 | *97.99*
-Linnaeus | *86.23* | 85.96
+BC5CDR-disease | 78.18 | **78.25**
+NCBI-disease | **85.62** | 83.44
+
+**Species group**
+
+Dataset | STM | MTM
+:-: | :-: | :-:
+BioNLP11ID-species | **68.80** | 66.93
+BioNLP13CG-species | 79.80 | **80.08**
+CRAFT-species | 97.84 | **97.99**
+Linnaeus | **86.23** | 85.96
 
 #### 5.3.6 注意力机制
 

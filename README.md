@@ -74,7 +74,7 @@ pip install -r requirements.txt
 - [x] 在CoNLL-2003上测试RNNs
 - [x] 在CoNLL-2003上测试MetaRNNs
 - [ ] NER冲刺state of the art
-- [ ] 展现MetaLSTM的迁移能力
+- [ ] MetaLSTM的迁移能力
 
 ## 5 实验
 
@@ -137,8 +137,8 @@ CoNLL-2003是一个命名实体识别数据集，包含4类实体：PER, LOC, OR
 - [x] 梯度更新方法（SGD, Adagrad, Adadelta, Adam, Nadam ...）
 - [x] 归一化方法（Dropout, Batch, Layer）
 - [x] 词向量（cove）
-- [ ] 注意力机制（待学习）
 - [x] 多任务学习（加标签）
+- [ ] 注意力机制（待学习）
 - [ ] 元学习（学习率更新）
 
 #### 5.3.1 模型最优
@@ -196,19 +196,13 @@ LSTM | 600 | 2 | CoVe | 87.57
 
 <p align="center"><img width="100%" src="images/embeddings/embedding_glove_cove-300.PNG" /></p>
 
-#### 5.3.5 注意力机制
-
-- [ ] 实验结果
-
-#### 5.3.6 多任务学习
+#### 5.3.5 多任务学习
 
 Dataset | STM | MTM
 :-: | :-: | :-:
-BioNLP13CG | 77.65 | 78.45
+BioNLP13CG | 77.65 | *78.45*
 BioNLP13PC | 83.28 | 82.49
-CRAFT | 76.59 | 78.61
-
-更多实验（in process）
+CRAFT | 76.59 | *78.61*
 
 **加标签**
 将BioNLP13CG、BioNLP13PC和CRAFT三个数据集合并成一个，通过在句子首尾加标签的方式进行区分，例如：
@@ -231,6 +225,54 @@ CRAFT | 76.59 | 78.61
 <p align="center"><img width="100%" src="images/cellulars/cellulars2.PNG" /></p>
 
 <p align="center"><img width="100%" src="images/cellulars/cellulars3.PNG" /></p>
+
+- [x] 补充实验
+
+*Cellular component group*
+
+Dataset | STM | MTM
+:-: | :-: | :-:
+BioNLP13CG-cc | *74.72* | 70.81
+BioNLP13PC-cc | *88.17* | 81.17
+CRAFT-cc | 64.24 | *65.65*
+
+*Cell group*
+
+Dataset | STM | MTM
+:-: | :-: | :-:
+BioNLP13CG-cell | *85.61* | 81.75
+CRAFT-cell | *89.33* | 88.79
+
+*Chemical group*
+
+Dataset | STM | MTM
+:-: | :-: | :-:
+BC4CHEMD | *82.90* | 82.10
+BC5CDR-chem | 84.80 | *87.32*
+BioNLP11ID-chem | *64.89* | 58.30
+BioNLP13CG-chem | 66.15 | *72.78*
+BioNLP13PC-chem | *74.27* | 70.80
+CRAFT-chem | *80.48* | 79.34
+
+*Disease group*
+
+Dataset | STM | MTM
+:-: | :-: | :-:
+BC5CDR-disease | 78.18 | *78.25*
+NCBI-disease | *85.62* | 83.44
+
+*Species group*
+
+Dataset | STM | MTM
+:-: | :-: | :-:
+BioNLP11ID-species | *68.80* | 66.93
+BioNLP13CG-species | 79.80 | *80.08*
+CRAFT-species | 97.84 | *97.99*
+Linnaeus | *86.23* | 85.96
+
+#### 5.3.6 注意力机制
+
+- [ ] 实验结果
 
 #### 5.3.7 元学习
 

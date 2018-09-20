@@ -235,7 +235,7 @@ def train(data, name, save_dset, save_model_dir, seg=True, ignore=False, cove_fl
         print('Error optimizer selection, please check config.optim.')
         exit(1)
 
-    best_test = -1
+    best_dev = -1
     epoch = data.iteration
     vis = visdom.Visdom()
     losses = []
@@ -255,18 +255,19 @@ def train(data, name, save_dset, save_model_dir, seg=True, ignore=False, cove_fl
         whole_token = 0
         random.shuffle(data.train_ids)
         model.train()
-        model.zero_grad()
         batch_size = data.batch_size
         train_num = len(data.train_ids)
-        total_batch = train_num // batch_size + 1
+        total_batch = train_num // batch_size
         for batch_id in range(total_batch):
+            model.zero_grad()
             start = batch_id * batch_size
             end = (batch_id+1) * batch_size
-            if end > train_num:
-                end = train_num
+            # if end > train_num:
+            #     break
+            #     #end = train_num
             instance = data.train_ids[start: end]
-            if not instance:
-                continue
+            # if not instance:
+            #     continue
             batch_word, batch_wordlen, batch_wordrecover, batch_char, batch_charlen, batch_charrecover, batch_label, mask = batchify_with_label(instance, data.gpu)
             instance_count += 1
             loss, tag_seq = model.neg_log_likelihood_loss(batch_word, batch_wordlen, batch_char, batch_charlen, batch_charrecover, batch_label, mask)
@@ -292,49 +293,54 @@ def train(data, name, save_dset, save_model_dir, seg=True, ignore=False, cove_fl
             if data.clip:
                 torch.nn.utils.clip_grad_norm(model.parameters(), 10.0)
             optimizer.step()
-            model.zero_grad()
-        tmp_time = time.time()
-        tmp_cost = tmp_time - tmp_start
-        print('\tInstance: %s; Time: %.2fs; loss: %.4f; acc: %s/%s=%.4f'
-              % (end, tmp_cost, sample_loss, right_token, whole_token, (right_token+0.0) / whole_token))
+        # tmp_time = time.time()
+        # tmp_cost = tmp_time - tmp_start
+        # print('\tInstance: %s; Time: %.2fs; loss: %.4f; acc: %s/%s=%.4f'
+        #       % (end, tmp_cost, sample_loss, right_token, whole_token, (right_token+0.0) / whole_token))
         epoch_finish = time.time()
         epoch_cost = epoch_finish - epoch_start
         print('Epoch: %s training finished. Time: %.2fs, speed: %.2ft/s, total_loss: %s'
               % (idx, epoch_cost, train_num/epoch_cost, total_loss))
-        speed, acc, p, r, f_train, dict_train = evaluate(data, model, 'train', ignore=ignore)
         speed, acc, p, r, f_dev, dict_dev = evaluate(data, model, 'dev', ignore=ignore)
-        speed, acc, p, r, f_test, dict_test = evaluate(data, model, 'test', ignore=ignore)
 
-        test_finish = time.time()
-        test_cost = test_finish - epoch_finish
+        dev_finish = time.time()
+        dev_cost = dev_finish - epoch_finish
 
         if seg:
-            current_score = f_test
-            print('Test: time: %.2fs, speed: %.2ft/s; acc: %.4f, p: %.4f, r: %.4f, f: %.4f'
-                  % (test_cost, speed, acc, p, r, f_test))
+            current_score = f_dev
+            print('Dev: time: %.2fs, speed: %.2ft/s; acc: %.4f, p: %.4f, r: %.4f, f: %.4f'
+                  % (dev_cost, speed, acc, p, r, f_dev))
         else:
             current_score = acc
-            print('Test: time: %.2fs, speed: %.2ft/s; acc: %.4f'
-                  % (test_cost, speed, acc))
-        if current_score > best_test:
+            print('Dev: time: %.2fs, speed: %.2ft/s; acc: %.4f'
+                  % (dev_cost, speed, acc))
+        if current_score > best_dev:
             if seg:
-                print('Exceed previous best f score: ', best_test)
+                print('Exceed previous best f score: ', best_dev)
             else:
-                print('Exceed previous best acc score: ', best_test)
+                print('Exceed previous best acc score: ', best_dev)
             model_name = save_model_dir + '/' + name
             torch.save(model.state_dict(), model_name)
-            best_test = current_score
+            best_dev = current_score
             with open(save_model_dir + '/' + name + '_eval_' + str(idx) + '.txt', 'w') as f:
                 if seg:
-                    f.write('acc: %.4f, p: %.4f, r: %.4f, f: %.4f' % (acc, p, r, best_test))
+                    f.write('acc: %.4f, p: %.4f, r: %.4f, f: %.4f' % (acc, p, r, best_dev))
                     f.write('acc: %.4f, p: %.4f' % (acc, p))
                 else:
                     f.write('acc: %.4f' % acc)
 
+        speed, acc, p, r, f_test, dict_test = evaluate(data, model, 'test', ignore=ignore)
+        test_finish = time.time()
+        test_cost = test_finish - epoch_finish
+
         if seg:
-            print('Current best f score: ', best_test)
+            print('Test: time: %.2fs, speed: %.2ft/s; acc: %.4f, p: %.4f, r: %.4f, f: %.4f'
+                  % (test_cost, speed, acc, p, r, f_test))
         else:
-            print('Current best acc score: ', best_test)
+            print('Test: time: %.2fs, speed: %.2ft/s; acc: %.4f'
+                  % (test_cost, speed, acc))
+
+        speed, acc, p, r, f_train, dict_train = evaluate(data, model, 'train', ignore=ignore)
 
         all_F.append([f_train*100.0, f_dev*100.0, f_test*100.0])
         Fwin = 'F1-score of ' + name + ' {train, dev, test}'

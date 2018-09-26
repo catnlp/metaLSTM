@@ -11,6 +11,7 @@ class Alphabet:
     def __init__(self, name, label=False, keep_growing=True):
         self.__name = name
         self.UNKNOWN = '</unk>'
+        self.PAD = '<pad>' ## catnlp add pad
         self.label = label
         self.instance2index = {}
         self.instances = []
@@ -19,6 +20,7 @@ class Alphabet:
         self.default_index = 0
         self.next_index = 1
         if not self.label:
+            self.add(self.PAD) ## catnlp_add pad
             self.add(self.UNKNOWN)
 
     def clear(self, keep_growing=True):

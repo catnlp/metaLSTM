@@ -60,9 +60,14 @@ class RNNBase(Module):
             states = [zeros] * self.num_layers
         return states
 
-    def forward(self, input):
+    def forward(self, input, length=None):
         states = self._initial_states(input.size(0))
         time_steps = input.size(1)
+
+        if length is None:
+            length = Variable(torch.LongTensor([time_steps] * input.size(0)))
+            if self.gpu:
+                length = length.cuda()
 
         if self.bidirectional:
             states_b = self._initial_states(input.size(0))
@@ -72,44 +77,100 @@ class RNNBase(Module):
             for num in range(self.num_layers):
                 for t in range(time_steps):
                     x = input[:, t, :]
-                    hx = getattr(self, 'cell{}'.format(num))(x, states[num])
-                    states[num] = hx
+                    # hx = getattr(self, 'cell{}'.format(num))(x, states[num])
+                    # mask = (t < length).float().unsqueeze(1).expand_as(hx)
+                    # hx = hx * mask + states[0] * (1 - mask)
+                    # states[num] = hx
                     if self.mode.startswith('LSTM'):
-                        outputs_f.append(hx[0])
+                        h, c = getattr(self, 'cell{}'.format(num))(x, states[num])
+                        mask_h = (t < length).float().unsqueeze(1).expand_as(h)
+                        h = h * mask_h + states[0][0] * (1 - mask_h)
+                        mask_c = (t < length).float().unsqueeze(1).expand_as(c)
+                        c = c * mask_c + states[0][1] * (1 - mask_c)
+                        states[num] = h, c
+                        outputs_f.append(h)
                     else:
+                        hx = getattr(self, 'cell{}'.format(num))(x, states[num])
+                        mask = (t < length).float().unsqueeze(1).expand_as(hx)
+                        hx = hx * mask + states[0] * (1 - mask)
+                        states[num] = hx
                         outputs_f.append(hx)
                 for t in range(time_steps)[::-1]:
                     x = input[:, t, :]
-                    hx = getattr(self, 'cellb{}'.format(num))(x, states_b[num])
-                    states_b[num] = hx
                     if self.mode.startswith('LSTM'):
-                        outputs_b.append(hx[0])
+                        h, c = getattr(self, 'cell{}'.format(num))(x, states_b[num])
+                        mask_h = (t < length).float().unsqueeze(1).expand_as(h)
+                        h = h * mask_h + states_b[0][0] * (1 - mask_h)
+                        mask_c = (t < length).float().unsqueeze(1).expand_as(c)
+                        c = c * mask_c + states_b[0][1] * (1 - mask_c)
+                        states_b[num] = h, c
+                        outputs_b.append(h)
                     else:
+                        hx = getattr(self, 'cell{}'.format(num))(x, states_b[num])
+                        mask = (t < length).float().unsqueeze(1).expand_as(hx)
+                        hx = hx * mask + states_b[0] * (1 - mask)
+                        states_b[num] = hx
                         outputs_b.append(hx)
+                    # hx = getattr(self, 'cellb{}'.format(num))(x, states_b[num])
+                    # mask = (t < length).float().unsqueeze(1).expand_as(hx)
+                    # hx = hx * mask + states_b[0] * (1 - mask)
+                    # states_b[num] = hx
+                    # if self.mode.startswith('LSTM'):
+                    #     outputs_b.append(hx[0])
+                    # else:
+                    #     outputs_b.append(hx)
                 outputs_b.reverse()
                 input = torch.cat([torch.stack(outputs_f).transpose(0, 1), torch.stack(outputs_b).transpose(0, 1)], 2)
                 outputs_f = []
                 outputs_b = []
-            output = input, input[-1]
         else:
-            outputs = []
-            for t in range(time_steps):
-                x = input[:, t, :]
-                for num in range(self.num_layers):
-                    hx = getattr(self, 'cell{}'.format(num))(x, states[num])
-                    states[num] = hx
+            # outputs = []
+            # for t in range(time_steps):
+            #     x = input[:, t, :]
+            #     for num in range(self.num_layers):
+            #         hx = getattr(self, 'cell{}'.format(num))(x, states[num])
+            #         states[num] = hx
+            #         if self.mode.startswith('LSTM'):
+            #             x = hx[0]
+            #         else:
+            #             x = hx
+            #     outputs.append(hx)
+            #  if self.mode.startswith('LSTM'):
+            #         hs, cs = zip(*outputs)
+            #         h = torch.stack(hs).transpose(0, 1)
+            #         output = h, (outputs[-1][0], outputs[-1][1])
+            #  else:
+            #         output = torch.stack(outputs).transpose(0, 1), outputs[-1]
+            outputs_f = []
+            for num in range(self.num_layers):
+                for t in range(time_steps):
+                    x = input[:, t, :]
                     if self.mode.startswith('LSTM'):
-                        x = hx[0]
+                        h, c = getattr(self, 'cell{}'.format(num))(x, states[num])
+                        mask_h = (t < length).float().unsqueeze(1).expand_as(h)
+                        h = h * mask_h + states[0][0] * (1 - mask_h)
+                        mask_c = (t < length).float().unsqueeze(1).expand_as(c)
+                        c = c * mask_c + states[0][1] * (1 - mask_c)
+                        states[num] = h, c
+                        outputs_f.append(h)
                     else:
-                        x = hx
-                outputs.append(hx)
+                        hx = getattr(self, 'cell{}'.format(num))(x, states[num])
+                        mask = (t < length).float().unsqueeze(1).expand_as(hx)
+                        hx = hx * mask + states[0] * (1 - mask)
+                        states[num] = hx
+                        outputs_f.append(hx)
+                    # hx = getattr(self, 'cell{}'.format(num))(x, states[num])
+                    # mask = (t < length).float().unsqueeze(1).expand_as(hx)
+                    # hx = hx * mask + states[0] * (1 - mask)
+                    # states[num] = hx
+                    # if self.mode.startswith('LSTM'):
+                    #     outputs_f.append(hx[0])
+                    # else:
+                    #     outputs_f.append(hx)
+                input = torch.stack(outputs_f).transpose(0, 1)
+                outputs_f = []
 
-            if self.mode.startswith('LSTM'):
-                hs, cs = zip(*outputs)
-                h = torch.stack(hs).transpose(0, 1)
-                output = h, (outputs[-1][0], outputs[-1][1])
-            else:
-                output = torch.stack(outputs).transpose(0, 1), outputs[-1]
+        output = input, input[-1]
         return output
 
 class RNN(RNNBase):

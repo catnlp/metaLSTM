@@ -49,7 +49,7 @@ class Config:
         self.label_alphabet_size = 0
 
         # hyper parameters
-        self.iteration = 100
+        self.iteration = 50
         self.batch_size = 10
         self.hidden_dim = 100
         self.hyper_hidden_dim = 100

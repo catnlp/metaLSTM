@@ -133,6 +133,9 @@ def evaluate(data, model, name, ignore=False):
         end = (batch_id+1) * batch_size
         if end > train_num:
             end = train_num
+
+        if end  == start + 1:  ## modify for norm
+            break
         instance = instances[start: end]
         if not instance:
             continue

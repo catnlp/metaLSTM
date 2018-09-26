@@ -12,6 +12,7 @@ from NER.Module.char import Char
 
 import torch
 import torch.nn as nn
+from torch.autograd import Variable
 import torch.nn.functional as F
 import numpy as np
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
@@ -37,7 +38,8 @@ class Encoder(nn.Module):
         self.hyper_embedding_dim = config.hyper_embedding_dim
         self.layers = config.layers
         self.drop = nn.Dropout(config.dropout)
-        self.word_embeddings = nn.Embedding(config.word_alphabet.size(), self.embedding_dim)
+        ## self.word_embeddings = nn.Embedding(config.word_alphabet.size(), self.embedding_dim)
+        self.word_embeddings = nn.Embedding(config.word_alphabet.size(), self.embedding_dim, padding_idx = config.word_alphabet.get_index('<pad>'))  ## catnlp add pad
         if config.pretrain_word_embedding is not None:
             self.word_embeddings.weight.data.copy_(torch.from_numpy(config.pretrain_word_embedding))
         else:
@@ -95,7 +97,8 @@ class Encoder(nn.Module):
             out, _ = pad_packed_sequence(out)
             out = out.transpose(1, 0)
         else:
-            out, _ = self.encoder(word_embs)
+            length = Variable(word_seq_lengths)
+            out, _ = self.encoder(word_embs, length)
         out = self.drop(out) ## catnlp
         return out
 

@@ -83,8 +83,10 @@ if __name__ == '__main__':
 
         name = 'MetaLSTM'  # catnlp
         config = Config()
+        # config.optim = 'Adam'
         config.lr = 0.015
         config.hidden_dim = 200
+        config.iteration = 200
         config.bid_flag = True
         config.number_normalized = True
         data_initialization(config, train_file, dev_file, test_file)
@@ -100,6 +102,7 @@ if __name__ == '__main__':
         if char_emb_file != 'none':
             print('load char emb file...norm: ', config.norm_char_emb)
             config.build_char_pretrain_emb(char_emb_file)
+        name = "MetaLSTM_SGD_z"
         train(config, name, dset_dir, save_model_dir, seg)
     elif status == 'test':
         data = load_data_setting(dset_dir)

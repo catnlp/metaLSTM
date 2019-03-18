@@ -124,9 +124,7 @@ class MetaLSTMCell(MetaRNNCellBase):
         meta_h = meta_state[0]
         meta_c = meta_state[1]
 
-        zi = F.linear(meta_h, self.weight_hzi) + self.bias_i
-        zH = F.linear(meta_h, self.weight_hzH) + self.bias_H
-        zb = F.linear(meta_h, self.weight_hzb)
+
 
         meta_pre = F.linear(torch.cat((input, main_h), 1), self.weight_ih) + F.linear(meta_h, self.weight_hh) + self.bias_hyper
 
@@ -136,6 +134,10 @@ class MetaLSTMCell(MetaRNNCellBase):
         meta_o = F.sigmoid(meta_pre[:, self.hyper_hidden_size * 3: ])
         meta_c = meta_f * meta_c + meta_i * meta_g
         meta_h = meta_o * F.tanh(meta_c)
+
+        zi = F.linear(meta_h, self.weight_hzi) + self.bias_i
+        zH = F.linear(meta_h, self.weight_hzH) + self.bias_H
+        zb = F.linear(meta_h, self.weight_hzb)
 
         pre = F.linear(zi, self.weight_dziH) * F.linear(input, self.weight_iH) + F.linear(zH, self.weight_dzHH) * F.linear(main_h, self.weight_HH) + F.linear(zb, self.weight_bzH) + self.bias
 
